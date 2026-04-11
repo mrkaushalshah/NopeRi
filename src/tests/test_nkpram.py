@@ -8,4 +8,5 @@ def generate_nkparam() -> str:
 # test
 val = generate_nkparam()
 print(len(val))   # 8
-print(val)
+print(val) 
+#

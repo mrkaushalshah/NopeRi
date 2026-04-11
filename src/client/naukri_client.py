@@ -19,7 +19,7 @@ logger.addHandler(_handler)
 
 # ------------------------------------------------------------------
 # IMPORTANT — IP / HOSTING ADVICE (read before deploying)
-#
+#################################
 # Naukri actively fingerprints the IP of every login and API request.
 # Through testing, certain hosting environments consistently trigger
 # MFA challenges or outright bans:
