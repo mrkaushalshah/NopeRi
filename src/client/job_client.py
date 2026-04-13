@@ -227,7 +227,7 @@ class NaukriJobClient:
         sid:    str = "",
         source: str = "recommended",   # "recommended" | "search"
     ):
-        url = "https://www.naukri.com/cloudgateway-workflow/workflow-services/apply-workflow/v1/apply"
+        url = APPLY_JOB_URL #"https://www.naukri.com/cloudgateway-workflow/workflow-services/apply-workflow/v1/apply"
 
         if not job.job_id:
             raise ValueError("Invalid job_id")
