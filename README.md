@@ -8,7 +8,7 @@ A lightweight and Selenium-free Python API client for Naukri.com, designed to he
 
 ---
 
-**Status:** 🟢 Working (Last tested: April 2026)
+**Status:** 🟢 Working (Last tested: May 2026)
 
 ---
 
