@@ -8,7 +8,7 @@
   - Implement resume reading and structured profile extraction.
   - Verification: AI returns correct JSON profile from `resume.txt`.
 
-- [ ] **Phase 2: Questionnaire Solver Implementation**
+- [x] **Phase 2: Questionnaire Solver Implementation**
   - Update `NaukriJobClient` to handle questionnaires using AI.
   - Implement prompt engineering for accurate HR answers.
   - Verification: Script correctly answers sample questionnaires without skipping.

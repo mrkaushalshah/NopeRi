@@ -110,13 +110,14 @@ APPLY_SRC_MAP = {
 
 class NaukriJobClient:
 
-    def __init__(self, login_client: NaukriLoginClient, use_pool: bool = False):
+    def __init__(self, login_client: NaukriLoginClient, ai_handler=None, use_pool: bool = False):
         if not login_client.session:
             raise NaukriAuthError("Login required")
 
         self._session = login_client.session
         # self._session = login_client.session if login_client else None
         self._client = login_client
+        self.ai_handler = ai_handler
 
         self.pool_idx = 0
         self.use_pool = use_pool
@@ -372,7 +373,7 @@ class NaukriJobClient:
     
 
 
-    def handle_static_questionnaire_and_apply(
+    def handle_ai_questionnaire_and_apply(
         self,
         job,
         questionnaire,
@@ -381,68 +382,27 @@ class NaukriJobClient:
         optional_skills=None,
         source="recommended"
     ):
-        import re
+        """Uses AI to solve the questionnaire and then applies for the job."""
+        if not self.ai_handler:
+            logger.error("AIHandler not provided to NaukriJobClient. Cannot solve questionnaire.")
+            return {"success": False, "error": "AIHandler missing"}
 
-        # 🔹 You can tweak these values anytime
-        PROFILE = {
-            "current_ctc": "5",
-            "expected_ctc": "7",
-            "default_exp": "2",
-            "notice_period": "30"
-        }
+        # Get job details for better context (JD)
+        job_details = self.get_job_details(job.job_id, sid)
+        jd = job_details.get("jobDetails", {}).get("jobDescription", "")
+        
+        # Solve using AI
+        answers = self.ai_handler.solve_questionnaire(
+            job_title=job.title,
+            job_description=jd,
+            questionnaire=questionnaire
+        )
 
-        def smart_answer(question, qtype, options):
-            q = question.lower()
+        if not answers:
+            logger.warning("AI failed to generate answers for job %s", job.job_id)
+            # You could add a fallback here if needed, but let's stick to AI for now
 
-            # ---------------- TEXT BOX ----------------
-            if qtype == "Text Box":
-
-                if "current ctc" in q:
-                    return PROFILE["current_ctc"]
-
-                if "expected ctc" in q:
-                    return PROFILE["expected_ctc"]
-
-                if "experience" in q:
-                    if "node" in q:
-                        return "2"
-                    if "python" in q:
-                        return "1"
-                    return PROFILE["default_exp"]
-
-                if "notice" in q:
-                    return PROFILE["notice_period"]
-
-                return "1"  # safe fallback
-
-            # ---------------- RADIO BUTTON ----------------
-            if qtype == "Radio Button":
-                for key, val in options.items():
-                    val_lower = val.lower()
-
-                    if any(k in val_lower for k in ["yes", "willing", "open"]):
-                        return key
-
-                # fallback → first option
-                return list(options.keys())[0] if options else None
-
-            return None
-
-        # ---------------- BUILD ANSWERS ----------------
-        answers = {}
-
-        for q in questionnaire:
-            qid = q.get("questionId")
-            qtext = q.get("questionName") or ""
-            qtype = q.get("questionType")
-            options = q.get("answerOption") or {}
-
-            ans = smart_answer(qtext, qtype, options)
-
-            if ans is not None:
-                answers[qid] = ans
-
-        logger.debug("Generated answers: %s", answers)
+        logger.debug("AI Generated answers: %s", answers)
 
         # ---------------- FINAL APPLY ----------------
         apply_src, logstr_template = APPLY_SRC_MAP.get(source, APPLY_SRC_MAP["recommended"])
@@ -457,12 +417,12 @@ class NaukriJobClient:
             "rdxMsgId": "",
             "chatBotSDK": True,
             "mandatory_skills": mandatory_skills or [],
-            "optional_skills": optional_skills or [],
-            "applyTypeId": "107",
-            "closebtn": "y",
-            "applySrc": apply_src,
-            "sid": sid,
-            "mid": "",
+            "optional_skills":  optional_skills or [],
+            "applyTypeId":      "107",
+            "closebtn":         "y",
+            "applySrc":         apply_src,
+            "sid":              sid,
+            "mid":              "",
             "applyData": {
                 job.job_id: {
                     "answers": answers

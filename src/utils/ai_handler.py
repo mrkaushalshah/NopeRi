@@ -82,3 +82,53 @@ class AIHandler:
         if not self.profile:
             return self.extract_profile()
         return self.profile
+
+    def solve_questionnaire(self, job_title, job_description, questionnaire):
+        """Uses AI to solve a job questionnaire based on the user's profile."""
+        profile = self.get_profile()
+        if not profile:
+            print("Cannot solve questionnaire without a profile.")
+            return {}
+
+        system_prompt = (
+            "You are an expert career assistant. Your task is to answer job application questionnaires "
+            "on behalf of a candidate, using their professional profile as the source of truth. "
+            "Maintain consistency and professionalism. Ensure all answers match the candidate's actual experience."
+        )
+
+        # Prepare questionnaire context for AI
+        q_list = []
+        for q in questionnaire:
+            qid = q.get("questionId")
+            qtext = q.get("questionName") or ""
+            qtype = q.get("questionType")
+            options = q.get("answerOption") or {}
+            
+            q_info = {
+                "id": qid,
+                "text": qtext,
+                "type": qtype,
+                "options": options
+            }
+            q_list.append(q_info)
+
+        user_prompt = (
+            f"Candidate Profile:\n{json.dumps(profile, indent=2)}\n\n"
+            f"Job Title: {job_title}\n"
+            f"Job Description: {job_description}\n\n"
+            f"Questionnaire:\n{json.dumps(q_list, indent=2)}\n\n"
+            "Answer each question in the questionnaire. For radio buttons/dropdowns, return the KEY of the best option. "
+            "For text boxes, provide a concise, professional answer. "
+            "Return a JSON object where keys are question IDs and values are the answers."
+        )
+
+        print(f"Solving questionnaire for '{job_title}'...")
+        response = self.generate_completion(system_prompt, user_prompt, json_mode=True)
+
+        if response:
+            try:
+                return json.loads(response)
+            except json.JSONDecodeError:
+                print("Failed to parse AI questionnaire response.")
+                return {}
+        return {}

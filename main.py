@@ -1,12 +1,12 @@
-
 from src.client.naukri_client import NaukriLoginClient
 from src.client.job_client import NaukriJobClient
+from src.utils.ai_handler import AIHandler
 from dotenv import load_dotenv
 from colorama import Fore, Style, init
 import os
-load_dotenv()
-import time 
+import time
 
+load_dotenv()
 init(autoreset=True)
 
 if __name__ == "__main__":
@@ -43,10 +43,16 @@ if __name__ == "__main__":
     # # print(client.get_form_key2())
 
     # # ---------------------------------------------------------------
-    # # 5. Recommended jobs — fetches personalised job listings
+    # # 5. AI Handler — initialises the AI profile from your resume
+    # # ---------------------------------------------------------------
+    ai = AIHandler()
+    ai.extract_profile() # Pre-extract profile data
+
+    # # ---------------------------------------------------------------
+    # # 6. Recommended jobs — fetches personalised job listings
     # #    based on your Naukri profile
     # # ---------------------------------------------------------------
-    jc = NaukriJobClient(client)
+    jc = NaukriJobClient(client, ai_handler=ai)
     # jobs = jc.get_recommended_jobs()
 
     # print("Fetching recommended jobs...")
@@ -84,7 +90,23 @@ if __name__ == "__main__":
                 # Check questionnaire
                 job_result = (result.get("jobs") or [{}])[0]
                 if job_result.get("questionnaire"):
-                    print(f"{Fore.YELLOW}   Skipped — questionnaire required{Style.RESET_ALL}")
+                    print(f"{Fore.YELLOW}   Questionnaire required. Solving with AI...{Style.RESET_ALL}")
+                    
+                    # Call the AI-powered questionnaire handler
+                    q_result = jc.handle_ai_questionnaire_and_apply(
+                        job, 
+                        job_result["questionnaire"], 
+                        sid="", # will generate new sid if empty
+                        mandatory_skills=mandatory, 
+                        optional_skills=optional, 
+                        source="search"
+                    )
+                    
+                    if q_result.get("success") or (q_result.get("jobs") and q_result["jobs"][0].get("applyStatus")):
+                        print(f"{Fore.GREEN}  [DONE] AI solved questionnaire and applied!{Style.RESET_ALL}")
+                    else:
+                        error_msg = q_result.get("error") or "Unknown AI error"
+                        print(f"{Fore.RED}   AI Application failed: {error_msg}{Style.RESET_ALL}")
                     continue
 
                 print(f"{Fore.GREEN}  [DONE] Applied successfully!{Style.RESET_ALL}")
