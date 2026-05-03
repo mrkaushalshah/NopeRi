@@ -138,11 +138,29 @@ class NaukriLoginClient:
             print(res.content)
             raise NaukriAuthError("Login failed")
 
-        token = self.session.cookies.get("nauk_at")
+        # Handle both dict-like and list-like cookies from different session implementations
+        cookies = self.session.cookies
+        token = None
+        
+        if hasattr(cookies, "get"):
+            token = cookies.get("nauk_at")
+        elif isinstance(cookies, list) or hasattr(cookies, "__iter__"):
+            for c in cookies:
+                # Handle dict-like
+                if isinstance(c, dict):
+                    if c.get("name") == "nauk_at":
+                        token = c.get("value")
+                        break
+                # Handle Cookie object-like
+                elif hasattr(c, "name"):
+                    if c.name == "nauk_at":
+                        token = c.value
+                        break
+        
         if not token:
-            raise NaukriAuthError("No token")
-
-        self.naukri_session = NaukriSession(token, self.session.cookies)
+            raise NaukriAuthError("No token found in cookies")
+        
+        self.naukri_session = NaukriSession(token, cookies)
 
         try:
             self.cache["form_key"] = self.get_form_key2()

@@ -1,0 +1,100 @@
+
+
+KAUSHAL SHAH 
+Senior Software Developer  |  Full-Stack  |  Angular · .NET Core · Node.js · AI Automation 
++91 99744 42525   ·   kaushal@mrkaushalshah.com   ·   linkedin.com/in/mrkaushalshah   ·   mrkaushalshah.com   ·   Pune, 
+India 
+ 
+PROFESSIONAL SUMMARY 
+Senior Full-Stack Developer with 4.5+ years of experience building enterprise-grade applications across 
+LegalTech, FinTech, and SaaS domains. Deep expertise in Angular, .NET Core, and Node.js with a strong track 
+record of delivering complex multi-role systems, backend migrations, and API integrations. Recently founded 
+Sparqal Systems — building AI automation products and delivering web solutions for SMBs. Proven ability to lead 
+modules, mentor junior developers, and own end-to-end delivery under lean constraints. 
+ 
+TECHNICAL SKILLS 
+ 
+Frontend Angular 18+, Vue.js, TypeScript, HTML5, CSS3, TailwindCSS, Bootstrap, Figma 
+Backend .NET Core, C#, Node.js, Express.js, REST APIs, Supabase 
+Database SQL Server, MySQL, MongoDB, Sequelize 
+DevOps Azure DevOps, CI/CD Pipelines, GitHub, Docker (basic) 
+AI / Automation OpenAI API, AI workflow automation, WhatsApp automation, prompt engineering 
+Other Cypress (E2E Testing), Selenium, RPA, Windows Authentication, JWT, S2S Auth 
+ 
+WORK EXPERIENCE 
+Founder & Full-Stack Developer  |  Sparqal Systems 
+Dec 2025 – Present 
+Surat, India (Remote) 
+ 
+– Founded a tech agency offering web design, web application development, and AI automation services to 
+SMBs across the world. 
+– Architected and built SAAS name Sparqal Orbit — a multi-tenant SaaS platform for Instagram DM automation 
+and AI-powered content scheduling (Angular, Node.js, DigitalOcean). 
+– Delivered full-stack client projects including “V&S Apparel” (multi-tenant e-commerce, Angular + Node.js + 
+MySQL + AWS EC2) with IP-based geo-routing and WhatsApp lead generation and “GreenStream 
+Accounts Pvt. Ltd.” an informative website for Financial and Accounting services. 
+– Built internal tools: InnerDesk CRM (React + Node.js + MongoDB), Real Estate CRM, LinkedIn post 
+scheduler, and a multi-agent system for agentic AI. 
+– Managed end-to-end delivery: client scoping, UI/UX, development, deployment, and post-launch support. 
+ 
+Senior Software Engineer  |  Utterwise Technologies Pvt. 
+Ltd. 
+Aug 2025 – Dec 2025 
+Pune, India 
+ 
+– Hired specifically to lead the restructuring of an entire legacy banking platform for JJIT Fintech Pvt. Ltd. 
+– Assessed existing architecture and drove the redesign of core banking modules for improved scalability and 
+maintainability. 
+– Worked directly with fintech stakeholders to align technical decisions with compliance and business 
+requirements. 
+
+ 
+Senior Software Developer  |  Xperate Systems Pvt. Ltd. 
+Dec 2022 – May 2025 
+Pune, India 
+ 
+– Delivered 8+ production projects across LegalTech and enterprise domains using Angular, .NET Core, and 
+Azure DevOps. 
+– Led backend migration of a VB.NET Customer Portal to .NET 9, improving scalability and building secure 
+customer-facing APIs. 
+– Built a 5-stage multi-role Payment Approval System with Windows Authentication and automated approval 
+workflows. 
+– Developed Speech Processing middleware integrating SpeechLive with Actionstep via S2S authentication 
+and data mapping. 
+– Contributed to a 14-member team on a LegalTech Case Management System with real-time updates and 
+email notifications. 
+– Led a 2-member team on the Account Request module with Actionstep API integration and RPA automation. 
+–  Built an internal Revenue Forecasting System for financial insights with automated billing rate and invoice 
+generation for Xperate Systems. 
+– Designed 5-page Figma UI for a client project; built Conflict Check identity validation system for compliance 
+workflows. 
+ 
+Software Developer  |  Siddhatech Software Services Pvt. 
+Ltd. 
+Oct 2021 – Dec 2022 
+Pune, India 
+ 
+– Built frontend interfaces in Angular and Vue.js across 5 client projects spanning logistics, HRMS, finance, and 
+e-learning. 
+– Migrated AngularJS codebase to Vue.js for Pagatodo (Finance), improving structure and runtime 
+performance. 
+– Implemented Cypress E2E automation testing for MardomGo (cargo shipping), improving release confidence. 
+– Designed UI in Figma and developed employee management, timesheets, and asset management for ART 
+HRMS (Vue.js). 
+ 
+KEY PROJECTS 
+ 
+Sparqal Orbit  —  Multi-tenant SaaS | Angular, Node.js, MySQL, DigitalOcean, OpenAI 
+– Instagram DM automation engine and AI content scheduling platform with 4-tier pricing model. 
+V&S Apparel  —  E-Commerce Platform | Angular, Node.js, MySQL, AWS EC2, Cloudflare 
+– Multi-tenant apparel platform with IP-based geo-routing, INR/USD pricing, WhatsApp lead-gen, and MySQL 
+DB partitioning. 
+Pay Your Share  —  Bill Splitting App | Angular, .NET Core, Azure CI/CD 
+– Group expense splitting app with Google Auth, email invitations, and fully automated Azure DevOps 
+deployment pipeline. 
+ 
+EDUCATION 
+Bachelor of Computer Application (Distance Learning) 
+Himalayan University, Arunachal Pradesh 
+2023 - 2026 
+ 

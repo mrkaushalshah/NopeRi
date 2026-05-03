@@ -14,8 +14,8 @@ if __name__ == "__main__":
     # Load credentials from .env file
     # (NAUKRI_USERNAME and NAUKRI_PASSWORD must be set)
     # ---------------------------------------------------------------
-    username = os.getenv("USERNAME")
-    password = os.getenv("PASSWORD")
+    username = os.getenv("NAUKRI_USERNAME")
+    password = os.getenv("NAUKRI_PASSWORD")
 
     # ---------------------------------------------------------------
     # 1. Login — authenticates and stores session + bearer token
@@ -56,7 +56,7 @@ if __name__ == "__main__":
 
     
     print("Searching jobs...")    
-    jobs = jc.search_jobs(keyword="Node.js developer", location="Hyderabad", experience=2)
+    jobs = jc.search_jobs(keyword="Angular developer", location="Pune", experience=4, job_age=1)
 
     if not jobs:
         print(f"{Fore.YELLOW}  No jobs found.{Style.RESET_ALL}")
@@ -64,9 +64,14 @@ if __name__ == "__main__":
         print(f"{Fore.GREEN}Found {len(jobs)} jobs{Style.RESET_ALL}")
 
         for job in jobs:
-            print(f"\n{Fore.CYAN}{'─'*50}{Style.RESET_ALL}")
+            print(f"\n{Fore.CYAN}{'-'*50}{Style.RESET_ALL}")
+            # print(f"{Fore.WHITE}  JSON   : {Fore.BLUE}{job}")
             print(f"{Fore.WHITE}  Title   : {Fore.YELLOW}{job.title}")
             print(f"{Fore.WHITE}  Company : {Fore.YELLOW}{job.company}")
+            print(f"{Fore.WHITE}  Description : {Fore.GREEN}{job.description}")
+            print(f"{Fore.WHITE}  Experience : {Fore.YELLOW}{job.experience}")
+            print(f"{Fore.WHITE}  Location : {Fore.YELLOW}{job.location}")
+            print(f"{Fore.WHITE}  Posted : {Fore.YELLOW}{job.posted_date}")
             print(f"{Fore.WHITE}  Job ID  : {Fore.YELLOW}{job.job_id}")
             print(f"{Fore.WHITE}  Tags    : {Fore.YELLOW}{job.tags}")
 
@@ -74,7 +79,7 @@ if __name__ == "__main__":
             optional  = job.tags[2:] if len(job.tags) > 2 else []
 
             try:
-                result = jc.apply_job(job, mandatory_skills=mandatory, optional_skills=optional, source="recommended")
+                result = jc.apply_job(job, mandatory_skills=mandatory, optional_skills=optional, source="search")
 
                 # Check questionnaire
                 job_result = (result.get("jobs") or [{}])[0]
@@ -82,12 +87,12 @@ if __name__ == "__main__":
                     print(f"{Fore.YELLOW}   Skipped — questionnaire required{Style.RESET_ALL}")
                     continue
 
-                print(f"{Fore.GREEN}  ✅ Applied successfully!{Style.RESET_ALL}")
+                print(f"{Fore.GREEN}  [DONE] Applied successfully!{Style.RESET_ALL}")
 
             except Exception as e:
                 print(f"{Fore.RED}   Failed: {e}{Style.RESET_ALL}")
             
-            time.sleep(3)
+            time.sleep(5) # Adding a slightly longer delay between applications for safety
 
 
 
