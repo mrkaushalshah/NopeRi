@@ -3,7 +3,7 @@
 ## Milestone 1: AI Foundation & Intelligence
 **Goal**: Establish AI connectivity and resume-based intelligence.
 
-- [ ] **Phase 1: AI Service & Profile Extraction**
+- [x] **Phase 1: AI Service & Profile Extraction**
   - Implement `AIHandler` for OpenAI-compatible API.
   - Implement resume reading and structured profile extraction.
   - Verification: AI returns correct JSON profile from `resume.txt`.
