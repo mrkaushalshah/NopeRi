@@ -233,7 +233,7 @@ class NaukriJobClient:
         if not sid:
             sid = datetime.utcnow().strftime("%Y%m%d%H%M%S") + "0000000"
 
-        url = f"https://www.naukri.com/jobapi/v4/job/{job_id}"
+        url = f"https://www.naukri.com/jobapi/v1/job/{job_id}"
 
         params = {
             "microsite": "y",
