@@ -2,6 +2,7 @@ from src.client.naukri_client import NaukriLoginClient
 from src.client.job_client import NaukriJobClient
 from src.utils.ai_handler import AIHandler
 from src.utils.job_logger import JobLogger
+from src.client.jop_classifier import JobFilterPipeline2
 from dotenv import load_dotenv
 from colorama import Fore, Style, init
 import os
@@ -62,12 +63,20 @@ if __name__ == "__main__":
     logger = JobLogger()
 
     print("Searching jobs...")    
-    jobs = jc.search_jobs(keyword="Angular developer", location="Pune", experience=4, job_age=1)
+    raw_jobs = jc.search_jobs(keyword="Angular developer", location="Pune", experience=4, job_age=7)
+
+    if not raw_jobs:
+        print(f"{Fore.YELLOW}  No jobs found from search.{Style.RESET_ALL}")
+        jobs = []
+    else:
+        print(f"{Fore.CYAN}Filtering jobs through AI Pipeline...{Style.RESET_ALL}")
+        filter_pipeline = JobFilterPipeline2(openai_api_key=os.getenv("OPENAI_API_KEY"))
+        jobs = filter_pipeline.run(raw_jobs) if raw_jobs else []
 
     if not jobs:
-        print(f"{Fore.YELLOW}  No jobs found.{Style.RESET_ALL}")
+        print(f"{Fore.YELLOW}  No jobs passed the filter.{Style.RESET_ALL}")
     else:
-        print(f"{Fore.GREEN}Found {len(jobs)} jobs{Style.RESET_ALL}")
+        print(f"{Fore.GREEN}Found {len(jobs)} high-quality jobs{Style.RESET_ALL}")
 
         success_count = 0
         skip_count = 0
@@ -76,6 +85,7 @@ if __name__ == "__main__":
         for job in jobs:
             print(f"\n{Fore.CYAN}{'-'*50}{Style.RESET_ALL}")
             print(f"{Fore.WHITE}  Title   : {Fore.YELLOW}{job.title}")
+            print(f"{Fore.WHITE}  Description : {Fore.YELLOW}{job.description}")
             print(f"{Fore.WHITE}  Company : {Fore.YELLOW}{job.company}")
             print(f"{Fore.WHITE}  Location: {Fore.YELLOW}{job.location}")
             print(f"{Fore.WHITE}  Job ID  : {Fore.YELLOW}{job.job_id}")
@@ -87,6 +97,17 @@ if __name__ == "__main__":
 
             mandatory = job.tags[:2] if job.tags else []
             optional  = job.tags[2:] if len(job.tags) > 2 else []
+
+            # ---- INTERACTIVE VERIFICATION ----
+            user_input = input(f"{Fore.MAGENTA}Apply to this job? (y/n/q) [{Fore.GREEN}y{Fore.MAGENTA}]: {Style.RESET_ALL}").strip().lower()
+            if user_input == 'q':
+                print(f"{Fore.YELLOW}Exiting application loop...{Style.RESET_ALL}")
+                break
+            if user_input == 'n':
+                print(f"{Fore.YELLOW}   [SKIP] User rejected.{Style.RESET_ALL}")
+                continue
+            # Treat empty input as 'y' (default)
+            # ----------------------------------
 
             try:
                 result = jc.apply_job(job, mandatory_skills=mandatory, optional_skills=optional, source="search")

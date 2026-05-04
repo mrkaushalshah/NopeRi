@@ -1,0 +1,50 @@
+{
+  "040526501024": {
+    "score": 50,
+    "reason": "Senior Full Stack Developer role, but requires 0-10 years of experience which is below the candidate's experience."
+  },
+  "040526501166": {
+    "score": 50,
+    "reason": "Senior Full Stack Developer role, but requires 0-10 years of experience which is below the candidate's experience."
+  },
+  "040526915096": {
+    "score": 70,
+    "reason": "Application Developer role with mandatory C#, but lacks full-stack or Angular requirements."
+  },
+  "300426032736": {
+    "score": 95,
+    "reason": "Pure Angular developer role, perfect match."
+  },
+  "270426931746": {
+    "score": 70,
+    "reason": "Frontend Developer role with mandatory TypeScript and JavaScript, but lacks strong Angular focus."
+  },
+  "040526500763": {
+    "score": 0,
+    "reason": "Pure mobile development role, candidate is a developer."
+  },
+  "270426001340": {
+    "score": 95,
+    "reason": "Pure Angular developer role, perfect match."
+  },
+  "290426500368": {
+    "score": 30,
+    "reason": "Angular Developer role but heavily focused on UI design and lacks core tech stack."
+  },
+  "280426502305": {
+    "score": 30,
+    "reason": "Frontend development role but lacks strong Angular focus and core stack."
+  },
+  "280426933034": {
+    "score": 30,
+    "reason": "Software Engineer role with a focus on Kubernetes and React, lacking core stack."
+  },
+  "280426929785": {
+    "score": 95,
+    "reason": "Pure Angular developer role, perfect match."
+  },
+  "270426501277": {
+    "score": 30,
+    "reason": "Angular Developer role but heavily focused on training and lacks core tech stack."
+  }
+}

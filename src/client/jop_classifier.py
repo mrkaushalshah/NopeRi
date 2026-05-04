@@ -3,69 +3,56 @@ import os
 import re
 import requests
 
-
-
-
-
 class JobFilterPipeline2:
 
     # ── your stack — AI scores against this ──────────────────────────────────
     MY_STACK = [
+        # ── Frontend ─────────────────────────────────────────────────
+        "angular", "vue", "vue.js", "typescript", "javascript", "html5", "css3", "tailwindcss", "bootstrap",
+
         # ── Core backend ──────────────────────────────────────────────
-        "node", "node.js", "nodejs", "python", "javascript", "typescript",
+        "node", "node.js", "nodejs", "python", ".net core", ".net", "c#",
 
         # ── Frameworks ───────────────────────────────────────────────
-        "express", "express.js", "fastapi", "flask", "nestjs", "nest.js",
-        "django", "hapi", "koa",
+        "express", "express.js", "fastapi", "flask",
 
         # ── Databases ────────────────────────────────────────────────
-        "mongodb", "mongoose", "postgresql", "mysql", "redis", "sqlite",
-        "dynamodb", "firestore", "cassandra", "elasticsearch",
-        "sql", "nosql",
+        "sql server", "mysql", "mongodb", "postgresql", "redis", "supabase", "sequelize",
 
         # ── Cloud & DevOps ───────────────────────────────────────────
-        "aws", "gcp", "azure", "docker", "kubernetes", "ci/cd",
-        "github actions", "jenkins", "terraform", "linux", "nginx",
-        "ec2", "s3", "lambda", "cloudwatch",
+        "aws", "azure", "azure devops", "docker", "ci/cd", "github",
 
         # ── APIs & Messaging ─────────────────────────────────────────
-        "rest", "rest api", "restful", "graphql", "websocket", "grpc",
-        "kafka", "rabbitmq", "celery", "bull", "socket.io",
+        "rest", "rest api", "restful",
 
         # ── Automation & Scraping ────────────────────────────────────
-        "selenium", "playwright", "puppeteer", "beautifulsoup", "scrapy",
-        "web scraping", "automation", "n8n", "trigger.dev", "zapier",
+        "selenium", "rpa", "automation",
 
         # ── AI / LLM ─────────────────────────────────────────────────
-        "langchain", "openai", "llm", "rag", "vector db", "pinecone",
-        "weaviate", "chromadb", "huggingface", "embeddings", "genai",
-        "langsmith", "llamaindex",
+        "openai", "llm", "ai", "prompt engineering",
 
         # ── Tools & Practices ────────────────────────────────────────
-        "git", "github", "postman", "swagger", "jwt", "oauth",
-        "microservices", "system design", "api design",
+        "git", "github", "cypress", "jwt", "windows authentication", "s2s auth",
     ]
 
     # ── hard veto BEFORE ai — title only, zero ambiguity ────────────────────
     VETO_TITLES = [
         "walk-in", "walkin", "walk in",
         "android developer", "ios developer", "flutter developer",
-        "frontend developer", "front-end developer",
-        "principal engineer", "staff engineer", "architect",
         "vp of", "head of engineering", "head of technology",
         "founder", "tutor", "trainer",
         "data scientist", "ml engineer", "data engineer", "intern", "internship",
         "engineering manager", "etl engineer", "prompt engineer",
         "analyst", "associate is engineer", "infra engineer",
-        "observability engineer","Manager"
+        "observability engineer", "manager",
+        "doctor", "mbbs", "md", "ms", "nurse", "medical", "clinical", "hospital"
     ]
-
 
     VETO_COMPANIES = {
     "accenture", "wipro", "infosys", "tcs", "cognizant",
     "capgemini", "hcl", "tech mahindra", "mphasis", "hexaware",
     "ltimindtree", "persistent", "birlasoft",
-}
+    }
 
     # ── red flag sniff on description (cheap, pre-ai) ───────────────────────
     # Only the things AI genuinely can't infer from tags alone
@@ -74,23 +61,18 @@ class JobFilterPipeline2:
         "venue listed": r"venue\s*:|interview venue|bring your resume|carry your resume",
     }
 
-
-
-
     SOFTWARE_KEYWORDS = {
         "software", "developer", "engineer", "engineering",
-        "backend", "full stack", "fullstack",
+        "backend", "full stack", "fullstack", "frontend", "front-end", "front end",
         "python", "node", "nodejs", "javascript", "typescript",
-        "django", "fastapi", "flask", "golang",
+        "angular", "vue", "c#", ".net", "dotnet",
         "devops", "cloud", "sre", "platform",
         "api", "microservices", "infrastructure",
-        "tech lead", "sde", "swe", "mts", "programmer","react"
+        "tech lead", "sde", "swe", "mts", "programmer", "react"
     }
 
     # if ANY of these appear in title → drop it
     FRONTEND_VETO_KEYWORDS = {
-        "frontend", "front-end", "front end",
-      "angular", "vue", "ui developer", "ui engineer",
         "android", "ios", "flutter", "mobile", "kotlin", "swift",
         "embedded", "firmware",
         "ml engineer", "data engineer", "data scientist","intern", "internship", "lead","Golang","MLops","devops","mlops", "golang"," Web developer - Java Technologies"
@@ -160,7 +142,7 @@ class JobFilterPipeline2:
             print(f"  {j.get('ai_score'):>3}  {j.get('title')} @ {j.get('company')}"
                   f"  |  {j.get('ai_reason', '')}")
 
-        return jobs
+        return [j["original_job"] for j in jobs]
 
     # =========================================================
     # NORMALIZE  — tags are the star, keep them clean
@@ -203,6 +185,7 @@ class JobFilterPipeline2:
             tags = [t.strip().lower() for t in raw_tags if t.strip()]
 
             normalized.append({
+                "original_job":   j,
                 "job_id":         job.get("job_id"),
                 "title":          (job.get("title")       or "").strip(),
                 "company":        (job.get("company")     or "").strip(),
@@ -369,112 +352,54 @@ class JobFilterPipeline2:
 
 
         prompt2 = f"""
-You are a strict job filter for a backend developer. Score each job 0-100.
-Be precise — avoid clustering scores at 85 or 60. Use the full range.
+You are a strict job filter for a Senior Full-Stack Developer. Score each job 0-100.
 
 CANDIDATE:
-- 2.3 years experience, backend-focused
-- Core stack: Node.js, Python, MongoDB, REST APIs, AWS
-- Also knows: Docker, CI/CD, automation, Selenium, Playwright, web scraping,
-  n8n, trigger.dev, LangChain, RAG, vector DBs, FastAPI, Flask, Express
-- Looking for: SDE1 / junior-mid backend or fullstack-backend roles
-- Prefers: startups, product companies, AI/automation work, remote/hybrid
-- Will NOT do: pure frontend, mobile, ML research, data science, DevOps-only
+- 4.5+ years experience, Full-Stack / Angular Frontend / .NET Backend
+- Core stack: Angular, Vue.js, .NET Core, C#, Node.js, TypeScript, SQL Server, MySQL, MongoDB
+- Also knows: Azure DevOps, AWS, CI/CD, Docker, Selenium, Cypress, OpenAI API, AI automation
+- Looking for: Senior Full-Stack, Senior Frontend (Angular), Senior Backend (.NET/Node), or Mid-Senior roles
+- Prefers: remote/hybrid, product companies, AI/automation projects
+- Will NOT do: pure mobile (Android/iOS), purely ML research, data science, DevOps-only, or medical/non-IT roles
 
-SCORING RUBRIC — use the full range, not just 85/60:
+SCORING RUBRIC — use the full range:
 
-90-100 — perfect fit, apply immediately
-  Node.js OR Python is mandatory tag + backend/fullstack role or python/node js is in the title of the job
-  + exp 0-2 yrs + familiar supporting stack. Startup or product company.
+80-100 — perfect fit, apply immediately
+  Pure Angular Frontend roles OR .NET Core/.NET/C# Backend roles OR Fullstack roles.
+  If the job is an "Angular Developer" or "Frontend Developer" requiring Angular, score it 90-100.
+  If the job is a ".NET Developer" or "C# Developer", score it 90-100.
+  If it requires Angular + .NET Core/Node.js, score it 100.
 
-75-89 — strong fit, apply
-  Node.js or Python present (mandatory or optional) + backend lean
-  + exp 0-3 yrs. Maybe one unfamiliar tag but overall good match.
+50-79 — strong fit, apply
+  Angular, .NET, or Node present (mandatory or optional) but slightly different tech stack (e.g., Angular + Java, or Vue + .NET).
+  Or experience is slightly off (e.g., requires 6-8 years, or 2-3 years).
 
-55-74 — decent fit, apply with lower priority
-  Some stack overlap, role is fullstack but not backend-heavy,
-  or exp is 3-4 yrs, or company type unclear.
+30-49 — weak, skip unless nothing better
+  Familiar tech present but role is vague, or stack is heavily dominated by Java/PHP/Ruby without our core stack.
 
-30-54 — weak, skip unless nothing better
-  Familiar tech present but role is vague, frontend-leaning,
-  or exp mismatch 4-5 yrs.
-
-10-29 — poor match
-  Very little stack overlap, or role is clearly not backend and have java,  
-
-0-9 — do not apply
-   That contain Java  and dotnet  Zero stack overlap (Java+Spring only, PHP only, .NET only etc.)
-  OR walk-in / venue / intern role.
+0-29 — do not apply
+  Zero stack overlap (Java+Spring only, PHP only, etc.).
+  Pure React or Pure QA/Testing roles with no development.
+  Walk-in / venue / intern role / medical / non-IT.
 
 RULES:
-- Node.js + MongoDB + 0-2yr backend → 90+, no exceptions
-- Java alongside Node/Python is fine — judge the full picture
-- Fullstack with Node backend → 65-80 depending on tag quality
-- "Software Engineer" with Python/Node tags → treat as backend, score 70-85
-- Pure React/Angular/Vue with no backend tags → 0-15
-- DevOps/infra-only with no app dev → 20-40
-- Intern roles → 0
-- Missing stack items is normal, don't over-penalise
-- Recency: 0-1 days old → mentally add 5 points
+- Pure Angular Developer roles are GREAT → 90-100.
+- Pure .NET Developer roles are GREAT → 90-100.
+- Fullstack with Angular/Node/.NET → 90-100.
+- Pure QA/Testing roles → 0-20.
+- MEDICAL / DOCTOR / NON-IT → 0 strictly.
 
-Return ONLY valid JSON, no explanation outside it:
+Return ONLY valid JSON:
 {{
-  "0": {{"score": 92, "reason": "Node.js + MongoDB mandatory, 0-2yr, startup backend"}},
-  "1": {{"score": 0,  "reason": "Java/Spring only, zero overlap"}}
+  "0": {{"score": 95, "reason": "Pure Angular frontend developer, perfect match"}},
+  "1": {{"score": 0,  "reason": "Pure QA testing role, candidate is a developer"}}
 }}
 
 Jobs:
 {job_block}
 """
-        prompt = f"""
-You are scoring job listings for a backend developer. Score each job 0-100.
+        prompt = prompt2
 
-CANDIDATE:
-- 2 years experience, backend-focused
-- Core stack: Node.js, Python, MongoDB, REST APIs, AWS
-- Also knows: automation, Selenium, web scraping, Docker, CI/CD, n8n, trigger.dev,
-  Playwright, Postman, Git, LangChain, RAG, vector DBs
-- Looking for: SDE1 or junior-mid backend/fullstack-backend roles
-- Likes: startups, product companies, AI/automation work, remote/hybrid
-
-SCORING:
-
-85-100 — apply immediately
-  Node.js or Python is a mandatory tag, other tags are familiar stack,
-  exp is 0-3 yrs or not specified, role is backend or fullstack-backend.
-
-60-84 — good fit, apply
-  Node.js or Python present but not mandatory, or fullstack role with
-  backend-heavy tags, or slight exp mismatch (3-4 yrs).
-
-35-59 — decent, worth applying
-  Some stack overlap but role is vague or tags are mixed frontend/backend,
-  or exp is borderline 4-5 yrs.
-
-10-34 — weak match, skip unless desperate
-  Familiar tech present but frontend-dominated, or very little tag overlap.
-
-0 — do not apply
-  Tags are entirely foreign stack (Java+Spring+Hibernate only, PHP only, etc.)
-  with zero overlap with candidate's stack. OR walk-in / venue in title.
-
-COMMON SENSE RULES (these matter):
-- Java appearing alongside Node.js or Python is FINE — score on the whole picture.
-- "Fullstack" with Node backend is a GOOD fit (60-80 range).
-- Missing one or two stack items is normal — don't penalise heavily.
-- A job tagged [node.js, mongodb] with exp 0-2 yrs should score 85+.
-- A job tagged [java, spring, hibernate] with NO node/python should score 0-15.
-- Recency matters: jobs 0-1 days old get +5 bonus mentally.
-
-Return ONLY valid JSON, no explanation outside it:
-{{
-  "0": {{"score": 85, "reason": "Node.js + MongoDB mandatory, 0-2yr, startup"}},
-  "1": {{"score": 0,  "reason": "Java/Spring only, zero stack overlap"}}
-}}
-
-Jobs:
-{job_block}
-"""
 
         try:
             res = requests.post(
