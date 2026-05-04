@@ -46,5 +46,17 @@
   "270426501277": {
     "score": 30,
     "reason": "Angular Developer role but heavily focused on training and lacks core tech stack."
+  },
+  "300426911108": {
+    "score": 90,
+    "reason": "Microsoft .NET stack role, strong match with .NET experience"
+  },
+  "300426910724": {
+    "score": 90,
+    "reason": "Microsoft .NET stack role, strong match with .NET experience"
+  },
+  "040526915565": {
+    "score": 50,
+    "reason": "Role involves .NET stack but is vague and requires 0-10 years of experience."
   }
 }

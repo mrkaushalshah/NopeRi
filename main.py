@@ -84,11 +84,15 @@ if __name__ == "__main__":
 
         for job in jobs:
             print(f"\n{Fore.CYAN}{'-'*50}{Style.RESET_ALL}")
+            print(f"{Fore.WHITE}  Job ID  : {Fore.YELLOW}{job.job_id}")
             print(f"{Fore.WHITE}  Title   : {Fore.YELLOW}{job.title}")
             print(f"{Fore.WHITE}  Description : {Fore.YELLOW}{job.description}")
+            print(f"{Fore.WHITE}  Salary : {Fore.YELLOW}{job.salary}")
+            print(f"{Fore.WHITE}  Experience : {Fore.YELLOW}{job.experience}")
+            print(f"{Fore.WHITE}  Posted Date : {Fore.YELLOW}{job.posted_date}")
             print(f"{Fore.WHITE}  Company : {Fore.YELLOW}{job.company}")
             print(f"{Fore.WHITE}  Location: {Fore.YELLOW}{job.location}")
-            print(f"{Fore.WHITE}  Job ID  : {Fore.YELLOW}{job.job_id}")
+            print(f"{Fore.WHITE}  Tags : {Fore.YELLOW}{job.tags}")
 
             if logger.is_applied(job.job_id):
                 print(f"{Fore.BLUE}   [SKIP] Already applied previously.{Style.RESET_ALL}")
@@ -127,22 +131,42 @@ if __name__ == "__main__":
                         source="search"
                     )
                     
-                    if q_result.get("success") or (q_result.get("jobs") and q_result["jobs"][0].get("applyStatus")):
+                    # Determine success for AI questionnaire
+                    q_success = False
+                    if q_result.get("status") == "success":
+                        q_success = True
+                    elif "applyStatus" in q_result and str(job.job_id) in q_result.get("applyStatus", {}):
+                        q_success = True
+                    elif (q_result.get("jobs") or [{}])[0].get("applyStatus"):
+                        q_success = True
+
+                    if q_success:
                         print(f"{Fore.GREEN}  [DONE] AI solved questionnaire and applied!{Style.RESET_ALL}")
                         logger.log_apply(job.job_id, job.title, job.company)
                         success_count += 1
                     else:
                         error_msg = q_result.get("error") or "Unknown AI error"
                         print(f"{Fore.RED}   AI Application failed: {error_msg}{Style.RESET_ALL}")
+                        print(f"{Fore.CYAN}   [DEBUG] raw response: {q_result}{Style.RESET_ALL}")
                         error_count += 1
                     continue
 
-                if job_result.get("applyStatus") or result.get("status") == "success":
+                # Determine success for normal apply
+                is_success = False
+                if result.get("status") == "success":
+                    is_success = True
+                elif "applyStatus" in result and str(job.job_id) in result.get("applyStatus", {}):
+                    is_success = True
+                elif job_result.get("applyStatus"):
+                    is_success = True
+
+                if is_success:
                     print(f"{Fore.GREEN}  [DONE] Applied successfully!{Style.RESET_ALL}")
                     logger.log_apply(job.job_id, job.title, job.company)
                     success_count += 1
                 else:
                     print(f"{Fore.RED}   Application failed (unknown reason).{Style.RESET_ALL}")
+                    print(f"{Fore.CYAN}   [DEBUG] raw response: {result}{Style.RESET_ALL}")
                     error_count += 1
 
             except Exception as e:
