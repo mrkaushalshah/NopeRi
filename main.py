@@ -267,8 +267,11 @@ async def main_async():
             await app.shutdown()
 
 if __name__ == "__main__":
-    # ---------------------------------------------------------------
-    # This architecture now uses asyncio to run Telegram bot polling 
-    # alongside the job search loop asynchronously.
-    # ---------------------------------------------------------------
-    asyncio.run(main_async())
+    import sys
+    if sys.platform == 'win32':
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+        
+    try:
+        asyncio.run(main_async())
+    except KeyboardInterrupt:
+        print(f"\n{Fore.YELLOW}Script stopped by user.{Style.RESET_ALL}")
