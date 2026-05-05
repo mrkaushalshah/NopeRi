@@ -453,6 +453,7 @@ class NaukriJobClient:
         experience: int = 2,
         results_per_page: int = 20,
         lat_long: str = "",
+        sort_by: str = "date"
     ) -> list[Job]:
 
         url = JOB_SEARCH_URL
@@ -469,6 +470,7 @@ class NaukriJobClient:
             "jobAge":           job_age,
             "location":         location,
             "l":                location,
+            "sortType":         sort_by,
 
             "nignbevent_src":   "jobsearchDeskGNB",
             "seoKey":           seo_key,

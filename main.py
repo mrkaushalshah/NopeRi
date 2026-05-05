@@ -95,54 +95,70 @@ async def job_search_loop(app: ApplicationBuilder):
     
     while True:
         try:
-            print("Searching jobs...")    
-            raw_jobs = jc.search_jobs(keyword="Angular developer", location="Pune", experience=4, job_age=7)
+            queries = [
+                {"keyword": "Angular developer", "location": "Pune"},
+                {"keyword": "Frontend developer", "location": "Pune"}
+            ]
 
-            if not raw_jobs:
-                print(f"{Fore.YELLOW}  No jobs found from search.{Style.RESET_ALL}")
-                jobs = []
-            else:
-                print(f"{Fore.CYAN}Filtering jobs through AI Pipeline...{Style.RESET_ALL}")
-                filter_pipeline = JobFilterPipeline2(openai_api_key=os.getenv("OPENAI_API_KEY"))
-                jobs = filter_pipeline.run(raw_jobs) if raw_jobs else []
+            for query in queries:
+                print(f"{Fore.CYAN}Searching jobs for: {query['keyword']} in {query['location']}...{Style.RESET_ALL}")
+                
+                for page in range(1, 4):
+                    print(f"Fetching page {page}...")
+                    raw_jobs = jc.search_jobs(
+                        keyword=query["keyword"], 
+                        location=query["location"], 
+                        experience=4, 
+                        job_age=7,
+                        page=page
+                    )
 
-            if not jobs:
-                print(f"{Fore.YELLOW}  No jobs passed the filter.{Style.RESET_ALL}")
-            else:
-                print(f"{Fore.GREEN}Found {len(jobs)} high-quality jobs{Style.RESET_ALL}")
+                    if not raw_jobs:
+                        print(f"{Fore.YELLOW}  No more jobs found for this query on page {page}.{Style.RESET_ALL}")
+                        break
 
-                for job in jobs:
-                    if logger.is_applied(job.job_id):
-                        print(f"{Fore.BLUE}   [SKIP] Already applied previously.{Style.RESET_ALL}")
-                        continue
-                    
-                    if str(job.job_id) in pending_jobs:
-                        continue
+                    # Filter out already applied jobs BEFORE AI to save costs
+                    new_jobs = [job for job in raw_jobs if not logger.is_applied(job.job_id) and str(job.job_id) not in pending_jobs]
 
-                    pending_jobs[str(job.job_id)] = job
-                    
-                    if bot and chat_id and chat_id != "your_telegram_chat_id_here":
-                        # We use getattr to safely get the properties, defaulting to existing properties if ai_* missing
-                        ai_score = getattr(job, "match_score", getattr(job, "ai_score", "N/A"))
-                        ai_reason = getattr(job, "reasoning", getattr(job, "ai_reason", "N/A"))
-                        text = (
-                            f"🏢 *{job.company}*\n"
-                            f"📌 *{job.title}*\n"
-                            f"💰 {job.salary} | ⏳ {job.experience} | 📍 {job.location}\n"
-                            f"🤖 *AI Score:* {ai_score}/100\n"
-                            f"📝 *Reason:* {ai_reason}\n"
-                        )
-                        keyboard = [
-                            [
-                                InlineKeyboardButton("✅ Apply", callback_data=f"apply:{job.job_id}"),
-                                InlineKeyboardButton("❌ Skip", callback_data=f"skip:{job.job_id}")
-                            ]
-                        ]
-                        reply_markup = InlineKeyboardMarkup(keyboard)
-                        await bot.send_message(chat_id=chat_id, text=text, parse_mode='Markdown', reply_markup=reply_markup)
-                        print(f"{Fore.GREEN}   Sent Telegram notification for job {job.job_id}{Style.RESET_ALL}")
+                    if not new_jobs:
+                        print(f"{Fore.YELLOW}  All jobs on page {page} already applied/pending. Skipping AI filter.{Style.RESET_ALL}")
                     else:
-                        print(f"{Fore.YELLOW}   Telegram not configured. Job pending: {job.title}{Style.RESET_ALL}")
+                        print(f"{Fore.CYAN}Filtering {len(new_jobs)} new jobs through AI Pipeline...{Style.RESET_ALL}")
+                        filter_pipeline = JobFilterPipeline2(openai_api_key=os.getenv("OPENAI_API_KEY"))
+                        jobs = filter_pipeline.run(new_jobs)
+
+                        if not jobs:
+                            print(f"{Fore.YELLOW}  No jobs passed the filter.{Style.RESET_ALL}")
+                        else:
+                            print(f"{Fore.GREEN}Found {len(jobs)} high-quality jobs{Style.RESET_ALL}")
+
+                            for job in jobs:
+                                pending_jobs[str(job.job_id)] = job
+                                
+                                if bot and chat_id and chat_id != "your_telegram_chat_id_here":
+                                    ai_score = getattr(job, "match_score", getattr(job, "ai_score", "N/A"))
+                                    ai_reason = getattr(job, "reasoning", getattr(job, "ai_reason", "N/A"))
+                                    text = (
+                                        f"🏢 *{job.company}*\n"
+                                        f"📌 *{job.title}*\n"
+                                        f"💰 {job.salary} | ⏳ {job.experience} | 📍 {job.location}\n"
+                                        f"🤖 *AI Score:* {ai_score}/100\n"
+                                        f"📝 *Reason:* {ai_reason}\n"
+                                    )
+                                    keyboard = [
+                                        [
+                                            InlineKeyboardButton("✅ Apply", callback_data=f"apply:{job.job_id}"),
+                                            InlineKeyboardButton("❌ Skip", callback_data=f"skip:{job.job_id}")
+                                        ]
+                                    ]
+                                    reply_markup = InlineKeyboardMarkup(keyboard)
+                                    await bot.send_message(chat_id=chat_id, text=text, parse_mode='Markdown', reply_markup=reply_markup)
+                                    print(f"{Fore.GREEN}   Sent Telegram notification for job {job.job_id}{Style.RESET_ALL}")
+                                else:
+                                    print(f"{Fore.YELLOW}   Telegram not configured. Job pending: {job.title}{Style.RESET_ALL}")
+
+                    # Small delay between page fetches to avoid rate limits
+                    await asyncio.sleep(2)
 
         except Exception as e:
             print(f"{Fore.RED}Error in job search loop: {e}{Style.RESET_ALL}")
