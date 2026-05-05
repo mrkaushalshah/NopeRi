@@ -60,8 +60,10 @@ class AIHandler:
             "- skills (categorized: frontend, backend, ai_automation, tools)\n"
             "- current_location\n"
             "- preferred_locations (list)\n"
+            "- current_ctc (if mentioned, otherwise null)\n"
             "- expected_ctc (if mentioned, otherwise null)\n"
-            "- notice_period (if mentioned, otherwise null)\n"
+            "- notice_period (string, e.g., 'Immediate Joiner', '0 days')\n"
+            "- azure_experience (string/years if mentioned)\n"
             "- summary (2-sentence professional summary)"
         )
 

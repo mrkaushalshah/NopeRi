@@ -10,8 +10,16 @@ Senior Full-Stack Developer with 4.5+ years of experience building enterprise-gr
 LegalTech, FinTech, and SaaS domains. Deep expertise in Angular, .NET Core, and Node.js with a strong track 
 record of delivering complex multi-role systems, backend migrations, and API integrations. Recently founded 
 Sparqal Systems — building AI automation products and delivering web solutions for SMBs. Proven ability to lead 
-modules, mentor junior developers, and own end-to-end delivery under lean constraints. 
- 
+module, mentor junior developers, and own end-to-end delivery under lean constraints. 
+
+CANDIDATE PREFERENCES & HR DETAILS 
+- Current CTC: 10 LPA 
+- Expected CTC: 12 LPA 
+- Notice Period: Immediate Joiner (0 days notice period, not serving any notice) 
+- Total IT Experience: 4.5+ Years 
+- Azure Experience: ~2.5 Years (Used Azure actively at Xperate Systems from Dec 2022 to May 2025)
+- Preferred Location: Pune, Remote, Hybrid 
+
 TECHNICAL SKILLS 
  
 Frontend Angular 18+, Vue.js, TypeScript, HTML5, CSS3, TailwindCSS, Bootstrap, Figma 

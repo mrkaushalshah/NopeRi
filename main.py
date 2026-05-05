@@ -198,6 +198,7 @@ async def job_search_loop(app: ApplicationBuilder):
                                         f"💰 {salary_str}\n"
                                         f"⏳ {job.experience}\n"
                                         f"📍 {job.location}\n"
+                                        f"📅 *Posted:* {job.posted_date}\n"
                                         f"🤖 *AI Score:* {ai_score}/100\n"
                                         f"📝 *Reason:* {ai_reason}\n"
                                         f"\n📄 *Description:*\n_{desc_str}_\n"
