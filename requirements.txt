@@ -6,3 +6,4 @@ selenium
 pycryptodome 
 colorama
 openai
+python-telegram-bot
