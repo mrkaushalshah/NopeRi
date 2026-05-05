@@ -41,6 +41,18 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             result = jc.apply_job(job, mandatory_skills=mandatory, optional_skills=optional, source="search")
             job_result = (result.get("jobs") or [{}])[0]
             
+            # Helper to check if already applied
+            def check_already_applied(res):
+                res_str = str(res).upper()
+                return "ALREADY_APPLIED" in res_str or ("ALREADY" in res_str and "APPLIED" in res_str)
+
+            if check_already_applied(result):
+                logger.log_apply(job.job_id, job.title, job.company)
+                await query.edit_message_text(text="✅ Already Applied previously! (Logged and cleared)")
+                if job_id in pending_jobs:
+                    del pending_jobs[job_id]
+                return
+
             if job_result.get("questionnaire"):
                 q_result = jc.handle_ai_questionnaire_and_apply(
                     job, 
@@ -50,6 +62,14 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     optional_skills=optional, 
                     source="search"
                 )
+                
+                if check_already_applied(q_result):
+                    logger.log_apply(job.job_id, job.title, job.company)
+                    await query.edit_message_text(text="✅ Already Applied previously! (Logged and cleared)")
+                    if job_id in pending_jobs:
+                        del pending_jobs[job_id]
+                    return
+
                 q_success = False
                 if q_result.get("status") == "success":
                     q_success = True
