@@ -400,9 +400,17 @@ class NaukriJobClient:
 
         if not answers:
             logger.warning("AI failed to generate answers for job %s", job.job_id)
-            # You could add a fallback here if needed, but let's stick to AI for now
 
-        logger.debug("AI Generated answers: %s", answers)
+        # Sanitize answers to prevent Akamai WAF from blocking HTML tags as XSS
+        import re
+        clean_answers = {}
+        for k, v in answers.items():
+            if isinstance(v, str):
+                clean_answers[k] = re.sub(r'<[^>]+>', '', v).strip()
+            else:
+                clean_answers[k] = v
+
+        logger.debug("AI Generated answers: %s", clean_answers)
 
         # ---------------- FINAL APPLY ----------------
         apply_src, logstr_template = APPLY_SRC_MAP.get(source, APPLY_SRC_MAP["recommended"])
@@ -425,7 +433,7 @@ class NaukriJobClient:
             "mid":              "",
             "applyData": {
                 job.job_id: {
-                    "answers": answers
+                    "answers": clean_answers
                 }
             }
         }
@@ -439,11 +447,11 @@ class NaukriJobClient:
 
         try:
             res_json = res.json()
-            res_json["ai_answers"] = answers
+            res_json["ai_answers"] = clean_answers
             res_json["questionnaire"] = questionnaire
             return res_json
         except Exception:
-            return {"success": False, "error": "Invalid JSON response", "ai_answers": answers, "questionnaire": questionnaire}
+            return {"success": False, "error": "Invalid JSON response", "ai_answers": clean_answers, "questionnaire": questionnaire}
     
 
 
