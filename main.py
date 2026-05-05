@@ -171,7 +171,7 @@ async def main_async():
 
     app = None
     if telegram_token and telegram_token != "your_telegram_bot_token_here":
-        app = ApplicationBuilder().token(telegram_token).build()
+        app = ApplicationBuilder().token(telegram_token).connect_timeout(30.0).read_timeout(30.0).write_timeout(30.0).build()
         app.add_handler(CallbackQueryHandler(button_callback))
         await app.initialize()
         await app.start()

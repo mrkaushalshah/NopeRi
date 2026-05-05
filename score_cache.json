@@ -58,5 +58,13 @@
   "040526915565": {
     "score": 50,
     "reason": "Role involves .NET stack but is vague and requires 0-10 years of experience."
+  },
+  "040526915339": {
+    "score": 90,
+    "reason": "Pure .NET developer role, perfect match"
+  },
+  "040526915206": {
+    "score": 90,
+    "reason": "Pure .NET developer role, perfect match"
   }
 }
