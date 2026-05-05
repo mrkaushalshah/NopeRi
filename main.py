@@ -60,7 +60,37 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
                 if q_success:
                     logger.log_apply(job.job_id, job.title, job.company)
-                    await query.edit_message_text(text="✅ Applied! (AI solved questionnaire)")
+                    
+                    q_text = "✅ *Applied! (AI solved questionnaire)*\n\n*Q&A:*\n"
+                    q_list = q_result.get("questionnaire", [])
+                    ai_ans = q_result.get("ai_answers", {})
+                    
+                    for q in q_list:
+                        q_id = str(q.get("questionId", ""))
+                        q_title = q.get("questionName", "Unknown question")
+                        
+                        # Strip HTML tags
+                        q_title = re.sub(r'<[^>]+>', '', q_title).strip()
+                        
+                        ans_key = str(ai_ans.get(q_id, "No answer provided"))
+                        
+                        # Map answer key to text if it's a multiple choice
+                        options = q.get("answerOption")
+                        ans_val = ans_key
+                        if isinstance(options, dict) and ans_key in options:
+                            ans_val = options[ans_key]
+                        elif isinstance(options, list):
+                            for opt in options:
+                                if isinstance(opt, dict) and str(opt.get("id")) == ans_key:
+                                    ans_val = opt.get("value", ans_key)
+                                    break
+                                    
+                        q_text += f"🔹 *{q_title}*\n  ↳ _{ans_val}_\n\n"
+
+                    if len(q_text) > 4000:
+                        q_text = q_text[:4000] + "...(truncated)"
+                        
+                    await query.edit_message_text(text=q_text, parse_mode='Markdown')
                 else:
                     await query.edit_message_text(text=f"❌ Application failed: {q_result.get('error') or 'Unknown error'}")
             else:

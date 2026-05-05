@@ -438,9 +438,12 @@ class NaukriJobClient:
             return {"success": False, "error": res.text}
 
         try:
-            return res.json()
+            res_json = res.json()
+            res_json["ai_answers"] = answers
+            res_json["questionnaire"] = questionnaire
+            return res_json
         except Exception:
-            return {"success": False, "error": "Invalid JSON response"}
+            return {"success": False, "error": "Invalid JSON response", "ai_answers": answers, "questionnaire": questionnaire}
     
 
 
