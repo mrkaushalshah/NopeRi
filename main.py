@@ -8,6 +8,7 @@ from colorama import Fore, Style, init
 import os
 import time
 import asyncio
+import re
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
 
@@ -138,12 +139,38 @@ async def job_search_loop(app: ApplicationBuilder):
                                 if bot and chat_id and chat_id != "your_telegram_chat_id_here":
                                     ai_score = getattr(job, "match_score", getattr(job, "ai_score", "N/A"))
                                     ai_reason = getattr(job, "reasoning", getattr(job, "ai_reason", "N/A"))
+                                    
+                                    # Format salary safely
+                                    salary_str = job.salary
+                                    if isinstance(salary_str, dict):
+                                        if salary_str.get("hideSalary"):
+                                            salary_str = "Not disclosed"
+                                        else:
+                                            min_s = salary_str.get("minimumSalary", "")
+                                            max_s = salary_str.get("maximumSalary", "")
+                                            curr = salary_str.get("currency", "INR")
+                                            if min_s or max_s:
+                                                salary_str = f"{min_s} - {max_s} {curr}"
+                                            else:
+                                                salary_str = "Not disclosed"
+                                    elif not salary_str:
+                                        salary_str = "Not disclosed"
+
+                                    # Format description safely
+                                    desc_str = job.description or "No description available."
+                                    desc_str = re.sub(r'<[^>]+>', '', desc_str) # strip basic html
+                                    if len(desc_str) > 250:
+                                        desc_str = desc_str[:247] + "..."
+                                        
                                     text = (
                                         f"🏢 *{job.company}*\n"
                                         f"📌 *{job.title}*\n"
-                                        f"💰 {job.salary} | ⏳ {job.experience} | 📍 {job.location}\n"
+                                        f"💰 {salary_str}\n"
+                                        f"⏳ {job.experience}\n"
+                                        f"📍 {job.location}\n"
                                         f"🤖 *AI Score:* {ai_score}/100\n"
                                         f"📝 *Reason:* {ai_reason}\n"
+                                        f"\n📄 *Description:*\n_{desc_str}_\n"
                                     )
                                     keyboard = [
                                         [

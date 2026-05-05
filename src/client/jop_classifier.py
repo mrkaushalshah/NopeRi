@@ -141,6 +141,15 @@ class JobFilterPipeline2:
         for j in jobs:
             print(f"  {j.get('ai_score'):>3}  {j.get('title')} @ {j.get('company')}"
                   f"  |  {j.get('ai_reason', '')}")
+            
+            # Attach AI insights back to the original job object
+            oj = j["original_job"]
+            if isinstance(oj, dict):
+                oj["ai_score"] = j.get("ai_score")
+                oj["ai_reason"] = j.get("ai_reason")
+            else:
+                setattr(oj, "ai_score", j.get("ai_score"))
+                setattr(oj, "ai_reason", j.get("ai_reason"))
 
         return [j["original_job"] for j in jobs]
 
