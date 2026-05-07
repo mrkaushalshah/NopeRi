@@ -3,6 +3,7 @@ from src.client.job_client import NaukriJobClient
 from src.utils.ai_handler import AIHandler
 from src.utils.job_logger import JobLogger
 from src.client.jop_classifier import JobFilterPipeline2
+from src.exceptions.exceptions import NaukriAuthError
 from dotenv import load_dotenv
 from colorama import Fore, Style, init
 import os
@@ -127,6 +128,13 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     await query.edit_message_text(text="✅ Applied successfully!")
                 else:
                     await query.edit_message_text(text="❌ Application failed (unknown reason).")
+        except NaukriAuthError:
+            await query.edit_message_text(text="🔄 Session expired. Auto-logging in... Please click '✅ Apply' again in a few seconds.")
+            try:
+                jc._client.login()
+            except Exception as login_e:
+                print(f"{Fore.RED}Re-login failed: {login_e}{Style.RESET_ALL}")
+            return
         except Exception as e:
             await query.edit_message_text(text=f"❌ Failed: {e}")
             
@@ -147,22 +155,36 @@ async def job_search_loop(app: ApplicationBuilder):
     while True:
         try:
             queries = [
+                {"keyword": "Software developer", "location": "Pune"},
+                {"keyword": "Senior Software developer", "location": "Pune"},
+                {"keyword": "Frontend developer", "location": "Pune"},
+                {"keyword": "Senior Frontend developer", "location": "Pune"},
                 {"keyword": "Angular developer", "location": "Pune"},
-                {"keyword": "Frontend developer", "location": "Pune"}
+                {"keyword": "Senior Angular developer", "location": "Pune"},
+                {"keyword": "Full Stack developer", "location": "Pune"},
+                {"keyword": "Senior Full Stack developer", "location": "Pune"},
             ]
 
             for query in queries:
                 print(f"{Fore.CYAN}Searching jobs for: {query['keyword']} in {query['location']}...{Style.RESET_ALL}")
                 
-                for page in range(1, 4):
+                for page in range(1, 5):
                     print(f"Fetching page {page}...")
-                    raw_jobs = jc.search_jobs(
-                        keyword=query["keyword"], 
-                        location=query["location"], 
-                        experience=4, 
-                        job_age=7,
-                        page=page
-                    )
+                    try:
+                        raw_jobs = jc.search_jobs(
+                            keyword=query["keyword"], 
+                            location=query["location"], 
+                            experience=4, 
+                            job_age=2,
+                            page=page
+                        )
+                    except Exception as e:
+                        if "400" in str(e) and "Requested page number doesn't exists" in str(e):
+                            print(f"{Fore.YELLOW}  No more pages available for this query.{Style.RESET_ALL}")
+                            break
+                        else:
+                            print(f"{Fore.RED}  Error on page {page}: {e}{Style.RESET_ALL}")
+                            break
 
                     if not raw_jobs:
                         print(f"{Fore.YELLOW}  No more jobs found for this query on page {page}.{Style.RESET_ALL}")
