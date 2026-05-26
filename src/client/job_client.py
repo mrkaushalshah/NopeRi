@@ -131,6 +131,25 @@ class NaukriJobClient:
     # ---------------------------------------------------------------------------
 
     def _parse_job(self, raw: dict) -> Job:
+        # Check if v2 or v3
+        if "post" in raw and "companyName" in raw: # v2
+            exp = f"{raw.get('minExp', '0')} - {raw.get('maxExp', '0')} years"
+            sal = f"{raw.get('minSal', '0')} - {raw.get('maxSal', '0')} {raw.get('currencySal', 'INR')}"
+            tags = [t.strip() for t in raw.get("keywords", "").split(",")] if raw.get("keywords") else []
+            return Job(
+                job_id=str(raw.get("jobId", "")),
+                title=raw.get("post", "N/A"),
+                company=raw.get("companyName", "N/A"),
+                location=raw.get("city", "N/A"),
+                experience=exp,
+                salary=sal,
+                posted_date=raw.get("addDate", "N/A"),
+                apply_link=raw.get("urlStr", ""),
+                description=raw.get("jobDesc", ""),
+                tags=tags
+            )
+        
+        # v3 fallback
         return Job(
             job_id=str(raw.get("jobId") or raw.get("id") or ""),
             title=raw.get("title") or raw.get("jobTitle") or "N/A",
@@ -198,23 +217,32 @@ class NaukriJobClient:
 
         return formatted
 
-    def _get_nkparam(self):
+    def _get_nkparam(self, page_type: str = "srp", app_id: str = "121"):
         if self.use_pool:
             token = self.pool[self.pool_idx % len(self.pool)]
             self.pool_idx += 1
             return token
-        return generate_nkparam("srp")
+        return generate_nkparam(page_type, app_id)
 
     def _search_headers(self):
-        headers = self._client._build_headers(auth=False)
+        headers = self._client._build_headers(auth=True)
         headers.update({
             "authority":        "www.naukri.com",
             "accept":           "application/json",
             "accept-encoding":  "gzip, deflate, br, zstd",
             "accept-language":  "en-US,en;q=0.9",
-            "appid":            "109",
+            "appid":            "121",
             "gid":              "LOCATION,INDUSTRY,EDUCATION,FAREA_ROLE",
-            "nkparam":          self._get_nkparam()
+            "nkparam":          self._get_nkparam("srp", "121"),
+
+            "referer":          "https://www.naukri.com/",
+            "sec-ch-ua":        '"Google Chrome";v="123", "Not:A-Brand";v="8", "Chromium";v="123"',
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": '"Windows"',
+            "sec-fetch-dest":   "empty",
+            "sec-fetch-mode":   "cors",
+            "sec-fetch-site":   "same-origin",
+            "x-requested-with": "XMLHttpRequest"
         })
         return headers
 
@@ -244,19 +272,17 @@ class NaukriJobClient:
         }
 
         headers = self._client._build_headers(auth=True)
-        headers["nkparam"] = self._get_nkparam()
         headers.update({
-        "appid": "109",
-        "systemid": "jobseeker",
-        "clientid": "d3skt0p",
-        "accept": "application/json",
-        "referer": "https://www.naukri.com/",
-        "sec-fetch-site": "same-origin",
-        "sec-fetch-mode": "cors",
-        "sec-fetch-dest": "empty",
-    })
-        headers["systemid"] = "Naukri"
-        headers["appid"] = "121"
+            "appid": "121",
+            "systemid": "Naukri",
+            "clientid": "d3skt0p",
+            "accept": "application/json",
+            "nkparam": self._get_nkparam("jd", "121"),
+            "referer": "https://www.naukri.com/",
+            "sec-fetch-site": "same-origin",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-dest": "empty",
+        })
         logger.debug("Fetching job details for job_id=%s sid=%s", job_id, sid)
 
         res = self._session.get(url, headers=headers, params=params)
@@ -502,7 +528,7 @@ class NaukriJobClient:
             raise NaukriParseError(f"Search failed: {res.status_code} — {res.text}")
 
         data = res.json()
-        raw_jobs = data.get("jobDetails") or data.get("jobs") or []
+        raw_jobs = data.get("jobDetails") or data.get("jobs") or data.get("list") or []
 
         oc_list = self.format_jobs(raw_jobs)
 

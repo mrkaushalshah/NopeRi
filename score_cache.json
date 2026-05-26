@@ -266,5 +266,489 @@
   "060526040289": {
     "score": 95,
     "reason": ".NET Software Developer role with .NET Core and .NET, strong match"
+  },
+  "060526929158": {
+    "score": 30,
+    "reason": "Familiar tech present but heavily dominated by Java and Spring, not a strong fit for candidate's core stack"
+  },
+  "070526009652": {
+    "score": 0,
+    "reason": "Zero stack overlap, Java and Kafka messaging are not part of the candidate's core stack."
+  },
+  "070526014251": {
+    "score": 80,
+    "reason": "Full stack role with .NET Core and SQL Server, candidate has relevant experience."
+  },
+  "070526018303": {
+    "score": 90,
+    "reason": "Pure .NET Developer role, perfect match"
+  },
+  "070526500652": {
+    "score": 50,
+    "reason": "Angular present but requires Java, candidate's core stack is not a match"
+  },
+  "060526015690": {
+    "score": 0,
+    "reason": "Zero stack overlap, candidate is a developer"
+  },
+  "060526504113": {
+    "score": 30,
+    "reason": "Familiar tech present but heavily dominated by data analytics"
+  },
+  "060526504112": {
+    "score": 30,
+    "reason": "Familiar tech present but heavily dominated by data analytics"
+  },
+  "060526504111": {
+    "score": 30,
+    "reason": "Familiar tech present but heavily dominated by data analytics"
+  },
+  "060526503365": {
+    "score": 30,
+    "reason": "Familiar tech present but heavily dominated by data analytics"
+  },
+  "050526501384": {
+    "score": 0,
+    "reason": "Zero stack overlap, candidate is a developer"
+  },
+  "050526501066": {
+    "score": 0,
+    "reason": "Zero stack overlap, candidate is a developer"
+  },
+  "050526500520": {
+    "score": 30,
+    "reason": "Familiar tech present but role is vague and not aligned with core stack"
+  },
+  "070526500892": {
+    "score": 30,
+    "reason": "Vague role with no relevant tech stack, primarily focused on PostgreSQL."
+  },
+  "070526501157": {
+    "score": 30,
+    "reason": "Role is related to AI but lacks core stack alignment."
+  },
+  "070526501478": {
+    "score": 0,
+    "reason": "Zero stack overlap, pure Java backend role"
+  },
+  "070526927160": {
+    "score": 30,
+    "reason": "Vague role with no specific mention of required technologies aligning with the candidate's skills."
+  },
+  "070526501232": {
+    "score": 0,
+    "reason": "Java is the primary technology, no overlap with candidate's core stack."
+  },
+  "200426011299": {
+    "score": 0,
+    "reason": "Zero stack overlap, role is specific to Guidewire."
+  },
+  "060526500771": {
+    "score": 90,
+    "reason": "Pure .NET Developer role, strong match with candidate's backend experience."
+  },
+  "050526500667": {
+    "score": 0,
+    "reason": "Role is specific to Salesforce, no overlap with candidate's core stack."
+  },
+  "070526027366": {
+    "score": 0,
+    "reason": "Zero stack overlap, role is focused on Python."
+  },
+  "070526929087": {
+    "score": 0,
+    "reason": "Zero stack overlap, role is focused on front-end development without specified technologies."
+  },
+  "070526029540": {
+    "score": 0,
+    "reason": "Zero stack overlap, primarily focused on Python and cloud technologies without relevant development experience."
+  },
+  "070526501801": {
+    "score": 30,
+    "reason": "Vague full stack role with no specific mention of required technologies, candidate's core stack not represented."
+  },
+  "070526929103": {
+    "score": 90,
+    "reason": "Application Developer role with Microsoft .NET Stack, strong match"
+  },
+  "070526929132": {
+    "score": 90,
+    "reason": "Application Developer role with Microsoft .NET Stack, strong match"
+  },
+  "070526929127": {
+    "score": 90,
+    "reason": "Application Developer role with mandatory C# and optional AI, strong fit for .NET experience."
+  },
+  "070526502289": {
+    "score": 90,
+    "reason": "Dot NET Developer role with required MS SQL and front-end experience, aligns well with candidate's .NET and SQL Server skills."
+  },
+  "070526030043": {
+    "score": 0,
+    "reason": "Zero stack overlap, requires Java and Spring Boot only"
+  },
+  "070526032995": {
+    "score": 0,
+    "reason": "Zero stack overlap, Full Stack PHP/Laravel Developer"
+  },
+  "070526033382": {
+    "score": 0,
+    "reason": "Zero stack overlap, candidate specializes in .NET/Angular."
+  },
+  "080526012052": {
+    "score": 0,
+    "reason": "Zero stack overlap, candidate specializes in Angular/.NET, this role is purely React"
+  },
+  "060526501942": {
+    "score": 0,
+    "reason": "Pure Python AI role, no overlap with candidate's stack"
+  },
+  "080526500060": {
+    "score": 70,
+    "reason": "Strong fit with .NET and C#, but lacks Angular and has lower experience requirement"
+  },
+  "070526010173": {
+    "score": 0,
+    "reason": "Pure React role, no overlap with candidate's stack"
+  },
+  "070526502501": {
+    "score": 30,
+    "reason": "Role is vague with a focus on automation and software design, but lacks core stack alignment."
+  },
+  "070526032043": {
+    "score": 0,
+    "reason": "Pure QA testing role with a focus on Java and Selenium, candidate is a developer."
+  },
+  "070526000276": {
+    "score": 0,
+    "reason": "Role focuses on SAP technologies with no overlap with candidate's core stack."
+  },
+  "070526027389": {
+    "score": 0,
+    "reason": "Role focuses on SmartComm and Thunderhead with no overlap with candidate's core stack."
+  },
+  "080526011205": {
+    "score": 0,
+    "reason": "Role is vague with no relevant tech stack, candidate is a developer"
+  },
+  "080526013055": {
+    "score": 95,
+    "reason": "Dot Net Developer role with .NET Core, perfect match"
+  },
+  "080526016817": {
+    "score": 95,
+    "reason": "Pure Angular frontend developer, perfect match"
+  },
+  "070526929160": {
+    "score": 0,
+    "reason": "Zero stack overlap, role is focused on open source application development without relevant technologies."
+  },
+  "070526929667": {
+    "score": 0,
+    "reason": "Zero stack overlap, role is focused on Oracle integration without relevant technologies."
+  },
+  "080526013724": {
+    "score": 30,
+    "reason": "Node.js role with no overlap in core stack, candidate is a full-stack developer."
+  },
+  "060326023929": {
+    "score": 30,
+    "reason": "Node.js role with no overlap in core stack, candidate is a full-stack developer."
+  },
+  "070526502962": {
+    "score": 0,
+    "reason": "Role is vague and does not match candidate's skills."
+  },
+  "070526502961": {
+    "score": 0,
+    "reason": "Role is vague and does not match candidate's skills."
+  },
+  "070526500383": {
+    "score": 0,
+    "reason": "Role focuses on Python and emerging technologies, no overlap with candidate's core stack."
+  },
+  "070526502164": {
+    "score": 0,
+    "reason": "Role is non-IT with no overlap in core stack."
+  },
+  "070526502145": {
+    "score": 0,
+    "reason": "Java role with no overlap in core stack, candidate is a full-stack developer."
+  },
+  "070526922890": {
+    "score": 0,
+    "reason": "Java role with no overlap in core stack, candidate is a full-stack developer."
+  },
+  "060526504439": {
+    "score": 0,
+    "reason": "Role is focused on software testing, candidate is a developer."
+  },
+  "060526033793": {
+    "score": 0,
+    "reason": "Tableau role with no overlap in core stack, candidate is a full-stack developer."
+  },
+  "060526500549": {
+    "score": 0,
+    "reason": "Role has no overlap in core stack, candidate is a full-stack developer."
+  },
+  "080526501001": {
+    "score": 30,
+    "reason": "Vague role with a focus on backend, no relevant technologies mentioned."
+  },
+  "080526500244": {
+    "score": 0,
+    "reason": "Zero stack overlap, role is focused on Spring Boot without relevant technologies."
+  },
+  "080526501381": {
+    "score": 0,
+    "reason": "Zero stack overlap, role heavily focused on core Java with no relevant technologies for the candidate."
+  },
+  "080526501389": {
+    "score": 0,
+    "reason": "Pure QA testing role, candidate is a developer"
+  },
+  "270126031070": {
+    "score": 0,
+    "reason": "Snowflake development role, no overlap with candidate's stack"
+  },
+  "171225036003": {
+    "score": 0,
+    "reason": "Abinitio development role, no overlap with candidate's stack"
+  },
+  "140326007462": {
+    "score": 0,
+    "reason": "Java development role, no overlap with candidate's stack"
+  },
+  "080526013696": {
+    "score": 0,
+    "reason": "Data conversion role, no overlap with candidate's stack"
+  },
+  "070526923871": {
+    "score": 0,
+    "reason": "Java development role, no overlap with candidate's stack"
+  },
+  "170426009382": {
+    "score": 0,
+    "reason": "Telematics development role, no overlap with candidate's stack"
+  },
+  "060526021114": {
+    "score": 0,
+    "reason": "React.js role, no overlap with candidate's stack"
+  },
+  "080526018596": {
+    "score": 0,
+    "reason": "Java programming role at EY, no overlap with candidate's stack"
+  },
+  "080526018576": {
+    "score": 0,
+    "reason": "Neo4J role with no overlap with candidate's stack"
+  },
+  "080526026162": {
+    "score": 30,
+    "reason": "Familiar tech present but heavily dominated by React, weak fit"
+  },
+  "280326013857": {
+    "score": 0,
+    "reason": "Zero stack overlap, role is vague and not aligned with core stack"
+  },
+  "080526501672": {
+    "score": 30,
+    "reason": "Role requires web services and hibernate, lacks core stack alignment."
+  },
+  "080526023370": {
+    "score": 0,
+    "reason": "Pure knowledge graph role, no overlap with candidate's stack"
+  },
+  "101025014953": {
+    "score": 95,
+    "reason": "Pure Angular frontend developer, perfect match"
+  },
+  "080526023802": {
+    "score": 30,
+    "reason": "React & Node.js present but lacks core stack alignment"
+  },
+  "080526029235": {
+    "score": 50,
+    "reason": "Role mentions AI and Azure, but lacks core stack overlap with candidate's experience."
+  },
+  "080526032797": {
+    "score": 30,
+    "reason": "Familiar tech present but role is vague, stack is heavily dominated by Java/PHP/Ruby without our core stack."
+  },
+  "080526032889": {
+    "score": 0,
+    "reason": "Zero stack overlap, TIBCO specific role."
+  },
+  "080426038241": {
+    "score": 0,
+    "reason": "Zero stack overlap, role requires IVR and Amazon Lex with no relevant technologies."
+  },
+  "180925014120": {
+    "score": 90,
+    "reason": "Pure .NET Developer role, strong match with candidate's skills."
+  },
+  "070526501791": {
+    "score": 0,
+    "reason": "Role is vague and does not align with core development skills."
+  },
+  "080526028736": {
+    "score": 0,
+    "reason": "Role focused on AI engineering, which is outside the candidate's preferred areas."
+  },
+  "070526500769": {
+    "score": 30,
+    "reason": "Vague role with a focus on front end and metadata, lacking specific technologies from the candidate's core stack."
+  },
+  "080526501396": {
+    "score": 0,
+    "reason": "Medical/non-IT role, candidate is a developer."
+  },
+  "080526501068": {
+    "score": 0,
+    "reason": "Zero stack overlap, role focused on Python."
+  },
+  "090526004320": {
+    "score": 30,
+    "reason": "Familiar tech present (Vue.js) but heavily dominated by Laravel/PHP, not a fit for the candidate."
+  },
+  "090526005158": {
+    "score": 30,
+    "reason": "Familiar tech present but heavily dominated by React, which is not in the candidate's core stack."
+  },
+  "090526006791": {
+    "score": 0,
+    "reason": "Mandatory stack is node.js and react.js, no overlap with candidate's core stack."
+  },
+  "090526008391": {
+    "score": 0,
+    "reason": "Zero stack overlap, role focuses on generative AI with no relevant tech."
+  },
+  "090526007649": {
+    "score": 0,
+    "reason": "Zero stack overlap, role requires PHP only."
+  },
+  "090526003942": {
+    "score": 30,
+    "reason": "Familiar tech present but role is vague, stack dominated by Node and MySQL without core stack."
+  },
+  "100526004792": {
+    "score": 0,
+    "reason": "Java Fullstack role, no overlap with candidate's core stack"
+  },
+  "301225030888": {
+    "score": 0,
+    "reason": "Zero stack overlap, role focused on cloud operations, not development."
+  },
+  "250226006118": {
+    "score": 50,
+    "reason": "Role requires .NET but focuses on Azure and Hadoop/Spark, which are not core to the candidate's experience."
+  },
+  "100526005837": {
+    "score": 30,
+    "reason": "Familiar tech present but heavily dominated by Java, candidate's core stack not aligned"
+  },
+  "100526005864": {
+    "score": 0,
+    "reason": "Zero stack overlap, role is focused on React.js and frontend development."
+  },
+  "110526000023": {
+    "score": 0,
+    "reason": "Java and Spring Boot are mandatory, which do not align with the candidate's core stack."
+  },
+  "110526008510": {
+    "score": 30,
+    "reason": "C# is mandatory but the stack is heavily focused on Delphi, which is not a match."
+  },
+  "110526902954": {
+    "score": 90,
+    "reason": "Strong alignment with .NET stack and optional Angular, perfect for the candidate."
+  },
+  "110526902915": {
+    "score": 90,
+    "reason": "Strong alignment with .NET stack and optional Angular, perfect for the candidate."
+  },
+  "110526902749": {
+    "score": 90,
+    "reason": "Strong alignment with .NET stack and optional Angular, perfect for the candidate."
+  },
+  "110526902629": {
+    "score": 90,
+    "reason": "Strong alignment with .NET stack and optional Angular, perfect for the candidate."
+  },
+  "110526005418": {
+    "score": 0,
+    "reason": "Pure React role, candidate is a developer with no React experience."
+  },
+  "080126029300": {
+    "score": 30,
+    "reason": "Java is mandatory, and the role is heavily focused on Java, which is not a match."
+  },
+  "190226038587": {
+    "score": 0,
+    "reason": "Zero stack overlap, pure Python backend role."
+  },
+  "201225006394": {
+    "score": 95,
+    "reason": "Fullstack role with .NET Core and C#, perfect match."
+  },
+  "110526902709": {
+    "score": 80,
+    "reason": "Microsoft .NET Stack role with optional Angular, strong fit."
+  },
+  "110526005538": {
+    "score": 90,
+    "reason": "Angular developer role, strong match with mandatory Angular."
+  },
+  "110526002041": {
+    "score": 0,
+    "reason": "Zero stack overlap, vague role with no relevant tech."
+  },
+  "110426017225": {
+    "score": 0,
+    "reason": "Zero stack overlap, vague role with no relevant tech."
+  },
+  "110526009431": {
+    "score": 30,
+    "reason": "Role is focused on backend development with Python and Django, no overlap with core stack."
+  },
+  "300426035983": {
+    "score": 0,
+    "reason": "Pure QA testing role, candidate is a developer."
+  },
+  "110526902942": {
+    "score": 50,
+    "reason": "Fullstack role but heavily focused on Python and Java, with Angular as optional."
+  },
+  "110526902919": {
+    "score": 50,
+    "reason": "Fullstack role but heavily focused on Python and Java, with Angular as optional."
+  },
+  "110526010561": {
+    "score": 30,
+    "reason": "Role focuses on AI and C#, but lacks full-stack development and is not aligned with core stack."
+  },
+  "110526013456": {
+    "score": 30,
+    "reason": "Role focuses on Python and AI, lacks core stack alignment."
+  },
+  "110526005902": {
+    "score": 0,
+    "reason": "Customer support role with no development focus."
+  },
+  "110526001704": {
+    "score": 30,
+    "reason": "Java Full Stack role, but lacks alignment with core stack (Java focus)."
+  },
+  "110526008105": {
+    "score": 0,
+    "reason": "Web development role with no relevant tech stack for the candidate."
+  },
+  "110526013683": {
+    "score": 90,
+    "reason": "C# and MS SQL are mandatory, aligning well with the candidate's .NET experience."
+  },
+  "110526001743": {
+    "score": 0,
+    "reason": "Role is heavily focused on Oracle technologies with no relevant stack overlap."
   }
 }

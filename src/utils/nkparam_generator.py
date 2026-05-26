@@ -8,9 +8,10 @@ from src.config.constants import *
 key = RSA.import_key(PUBLIC_KEY)
 cipher = PKCS1_v1_5.new(key)
 
-def generate_nkparam(page_type: str = "srp") -> str:
+def generate_nkparam(page_type: str = "srp", app_id: str = "121") -> str:
     timestamp = int(time.time() * 1000)
-    plaintext = f"v0|{timestamp}|121_{page_type}"
+    plaintext = f"v0|{timestamp}|{app_id}_{page_type}"
     encrypted = cipher.encrypt(plaintext.encode('utf-8'))
-    print("Nkparam tokemn was generated :", base64.b64encode(encrypted).decode('utf-8'))
+    # print("Nkparam token was generated :", base64.b64encode(encrypted).decode('utf-8'))
     return base64.b64encode(encrypted).decode('utf-8')
+

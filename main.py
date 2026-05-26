@@ -10,6 +10,7 @@ import os
 import time
 import asyncio
 import re
+import random
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
 
@@ -38,105 +39,119 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         mandatory = job.tags[:2] if job.tags else []
         optional  = job.tags[2:] if len(job.tags) > 2 else []
         
-        try:
-            result = jc.apply_job(job, mandatory_skills=mandatory, optional_skills=optional, source="search")
-            job_result = (result.get("jobs") or [{}])[0]
-            
-            # Helper to check if already applied
-            def check_already_applied(res):
-                res_str = str(res).upper()
-                return "ALREADY_APPLIED" in res_str or ("ALREADY" in res_str and "APPLIED" in res_str)
-
-            if check_already_applied(result):
-                logger.log_apply(job.job_id, job.title, job.company)
-                await query.edit_message_text(text="✅ Already Applied previously! (Logged and cleared)")
-                if job_id in pending_jobs:
-                    del pending_jobs[job_id]
-                return
-
-            if job_result.get("questionnaire"):
-                q_result = jc.handle_ai_questionnaire_and_apply(
-                    job, 
-                    job_result["questionnaire"], 
-                    sid="", 
-                    mandatory_skills=mandatory, 
-                    optional_skills=optional, 
-                    source="search"
-                )
+        max_retries = 2
+        for attempt in range(max_retries):
+            try:
+                result = jc.apply_job(job, mandatory_skills=mandatory, optional_skills=optional, source="search")
+                job_result = (result.get("jobs") or [{}])[0]
                 
-                if check_already_applied(q_result):
+                # Helper to check if already applied
+                def check_already_applied(res):
+                    res_str = str(res).upper()
+                    return "ALREADY_APPLIED" in res_str or ("ALREADY" in res_str and "APPLIED" in res_str)
+
+                if check_already_applied(result):
                     logger.log_apply(job.job_id, job.title, job.company)
                     await query.edit_message_text(text="✅ Already Applied previously! (Logged and cleared)")
                     if job_id in pending_jobs:
                         del pending_jobs[job_id]
                     return
 
-                q_success = False
-                if q_result.get("status") == "success":
-                    q_success = True
-                elif "applyStatus" in q_result and str(job.job_id) in q_result.get("applyStatus", {}):
-                    q_success = True
-                elif (q_result.get("jobs") or [{}])[0].get("applyStatus"):
-                    q_success = True
-
-                if q_success:
-                    logger.log_apply(job.job_id, job.title, job.company)
+                if job_result.get("questionnaire"):
+                    q_result = jc.handle_ai_questionnaire_and_apply(
+                        job, 
+                        job_result["questionnaire"], 
+                        sid="", 
+                        mandatory_skills=mandatory, 
+                        optional_skills=optional, 
+                        source="search"
+                    )
                     
-                    q_text = "✅ *Applied! (AI solved questionnaire)*\n\n*Q&A:*\n"
-                    q_list = q_result.get("questionnaire", [])
-                    ai_ans = q_result.get("ai_answers", {})
-                    
-                    for q in q_list:
-                        q_id = str(q.get("questionId", ""))
-                        q_title = q.get("questionName", "Unknown question")
-                        
-                        # Strip HTML tags
-                        q_title = re.sub(r'<[^>]+>', '', q_title).strip()
-                        
-                        ans_key = str(ai_ans.get(q_id, "No answer provided"))
-                        
-                        # Map answer key to text if it's a multiple choice
-                        options = q.get("answerOption")
-                        ans_val = ans_key
-                        if isinstance(options, dict) and ans_key in options:
-                            ans_val = options[ans_key]
-                        elif isinstance(options, list):
-                            for opt in options:
-                                if isinstance(opt, dict) and str(opt.get("id")) == ans_key:
-                                    ans_val = opt.get("value", ans_key)
-                                    break
-                                    
-                        q_text += f"🔹 *{q_title}*\n  ↳ _{ans_val}_\n\n"
+                    if check_already_applied(q_result):
+                        logger.log_apply(job.job_id, job.title, job.company)
+                        await query.edit_message_text(text="✅ Already Applied previously! (Logged and cleared)")
+                        if job_id in pending_jobs:
+                            del pending_jobs[job_id]
+                        return
 
-                    if len(q_text) > 4000:
-                        q_text = q_text[:4000] + "...(truncated)"
-                        
-                    await query.edit_message_text(text=q_text, parse_mode='Markdown')
-                else:
-                    await query.edit_message_text(text=f"❌ Application failed: {q_result.get('error') or 'Unknown error'}")
-            else:
-                is_success = False
-                if result.get("status") == "success":
-                    is_success = True
-                elif "applyStatus" in result and str(job.job_id) in result.get("applyStatus", {}):
-                    is_success = True
-                elif job_result.get("applyStatus"):
-                    is_success = True
+                    q_success = False
+                    if q_result.get("status") == "success":
+                        q_success = True
+                    elif "applyStatus" in q_result and str(job.job_id) in q_result.get("applyStatus", {}):
+                        q_success = True
+                    elif (q_result.get("jobs") or [{}])[0].get("applyStatus"):
+                        q_success = True
 
-                if is_success:
-                    logger.log_apply(job.job_id, job.title, job.company)
-                    await query.edit_message_text(text="✅ Applied successfully!")
+                    if q_success:
+                        logger.log_apply(job.job_id, job.title, job.company)
+                        
+                        q_text = "✅ *Applied! (AI solved questionnaire)*\n\n*Q&A:*\n"
+                        q_list = q_result.get("questionnaire", [])
+                        ai_ans = q_result.get("ai_answers", {})
+                        
+                        for q in q_list:
+                            q_id = str(q.get("questionId", ""))
+                            q_title = q.get("questionName", "Unknown question")
+                            
+                            # Strip HTML tags
+                            q_title = re.sub(r'<[^>]+>', '', q_title).strip()
+                            
+                            ans_key = str(ai_ans.get(q_id, "No answer provided"))
+                            
+                            # Map answer key to text if it's a multiple choice
+                            options = q.get("answerOption")
+                            ans_val = ans_key
+                            if isinstance(options, dict) and ans_key in options:
+                                ans_val = options[ans_key]
+                            elif isinstance(options, list):
+                                for opt in options:
+                                    if isinstance(opt, dict) and str(opt.get("id")) == ans_key:
+                                        ans_val = opt.get("value", ans_key)
+                                        break
+                                        
+                            q_text += f"🔹 *{q_title}*\n  ↳ _{ans_val}_\n\n"
+
+                        if len(q_text) > 4000:
+                            q_text = q_text[:4000] + "...(truncated)"
+                            
+                        await query.edit_message_text(text=q_text, parse_mode='Markdown')
+                    else:
+                        await query.edit_message_text(text=f"❌ Application failed: {q_result.get('error') or 'Unknown error'}")
                 else:
-                    await query.edit_message_text(text="❌ Application failed (unknown reason).")
-        except NaukriAuthError:
-            await query.edit_message_text(text="🔄 Session expired. Auto-logging in... Please click '✅ Apply' again in a few seconds.")
-            try:
-                jc._client.login()
-            except Exception as login_e:
-                print(f"{Fore.RED}Re-login failed: {login_e}{Style.RESET_ALL}")
-            return
-        except Exception as e:
-            await query.edit_message_text(text=f"❌ Failed: {e}")
+                    is_success = False
+                    if result.get("status") == "success":
+                        is_success = True
+                    elif "applyStatus" in result and str(job.job_id) in result.get("applyStatus", {}):
+                        is_success = True
+                    elif job_result.get("applyStatus"):
+                        is_success = True
+
+                    if is_success:
+                        logger.log_apply(job.job_id, job.title, job.company)
+                        await query.edit_message_text(text="✅ Applied successfully!")
+                    else:
+                        await query.edit_message_text(text="❌ Application failed (unknown reason).")
+                
+                # If we reached here, success or handled error
+                break
+
+            except NaukriAuthError:
+                if attempt < max_retries - 1:
+                    print(f"{Fore.YELLOW}Session expired. Attempting auto-login (attempt {attempt+1}/{max_retries})...{Style.RESET_ALL}")
+                    await query.edit_message_text(text="🔄 Session expired. Auto-logging in and retrying...")
+                    try:
+                        jc._client.login()
+                        # Next iteration will retry the application
+                    except Exception as login_e:
+                        print(f"{Fore.RED}Auto-login failed: {login_e}{Style.RESET_ALL}")
+                        await query.edit_message_text(text=f"❌ Session expired. Re-login failed: {login_e}")
+                        return
+                else:
+                    await query.edit_message_text(text="❌ Session expired. Auto-login failed after retry. Please check credentials.")
+                    return
+            except Exception as e:
+                await query.edit_message_text(text=f"❌ Failed: {e}")
+                return
             
         if job_id in pending_jobs:
             del pending_jobs[job_id]
@@ -189,6 +204,9 @@ async def job_search_loop(app: ApplicationBuilder):
                     if not raw_jobs:
                         print(f"{Fore.YELLOW}  No more jobs found for this query on page {page}.{Style.RESET_ALL}")
                         break
+
+                    # Random jitter between page fetches
+                    await asyncio.sleep(random.uniform(3, 7))
 
                     # Filter out already applied jobs BEFORE AI to save costs
                     new_jobs = [job for job in raw_jobs if not logger.is_applied(job.job_id) and str(job.job_id) not in pending_jobs]
@@ -258,14 +276,37 @@ async def job_search_loop(app: ApplicationBuilder):
                                 else:
                                     print(f"{Fore.YELLOW}   Telegram not configured. Job pending: {job.title}{Style.RESET_ALL}")
 
-                    # Small delay between page fetches to avoid rate limits
-                    await asyncio.sleep(2)
+                    # Increased delay between page fetches to avoid rate limits
+                    await asyncio.sleep(random.uniform(5, 10))
 
         except Exception as e:
             print(f"{Fore.RED}Error in job search loop: {e}{Style.RESET_ALL}")
             
         print(f"{Fore.YELLOW}Sleeping for 10 minutes...{Style.RESET_ALL}")
         await asyncio.sleep(600)
+
+async def session_heartbeat():
+    """Periodically touches the Naukri API to keep the session alive."""
+    global jc
+    while True:
+        await asyncio.sleep(600) # Every 10 minutes
+        try:
+            if jc and jc._client and jc._client.naukri_session:
+                print(f"{Fore.BLUE}Heartbeat: Keeping session active...{Style.RESET_ALL}")
+                # Fetching profile ID is a lightweight authenticated request
+                jc._client.fetch_profile_id()
+                print(f"{Fore.BLUE}Heartbeat: Session touched successfully.{Style.RESET_ALL}")
+            else:
+                print(f"{Fore.YELLOW}Heartbeat: No active session to touch.{Style.RESET_ALL}")
+        except NaukriAuthError:
+            print(f"{Fore.YELLOW}Heartbeat: Session expired during touch. Re-logging in...{Style.RESET_ALL}")
+            try:
+                jc._client.login()
+                print(f"{Fore.GREEN}Heartbeat: Re-login successful.{Style.RESET_ALL}")
+            except Exception as login_e:
+                print(f"{Fore.RED}Heartbeat: Re-login failed: {login_e}{Style.RESET_ALL}")
+        except Exception as e:
+            print(f"{Fore.RED}Heartbeat error: {e}{Style.RESET_ALL}")
 
 async def main_async():
     global jc, logger
@@ -294,8 +335,9 @@ async def main_async():
         await app.start()
         await app.updater.start_polling()
 
-    # Run the search loop concurrently
+    # Run the search loop and heartbeat concurrently
     search_task = asyncio.create_task(job_search_loop(app))
+    heartbeat_task = asyncio.create_task(session_heartbeat())
     
     try:
         while True:
@@ -304,6 +346,7 @@ async def main_async():
         pass
     finally:
         search_task.cancel()
+        heartbeat_task.cancel()
         if app:
             await app.updater.stop()
             await app.stop()
