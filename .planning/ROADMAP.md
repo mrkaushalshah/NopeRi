@@ -61,3 +61,11 @@
 - Implement a Telegram Bot using long polling to send job alerts.
 - Implement inline interactive buttons (`[Apply]`, `[Skip]`) decoupled from search.
 - Verification: Bot runs 24/7 without blocking and applies on button tap.
+
+### Phase 6: Local Company Outreach Engine
+- Create an Angular UI (with Tailwind CSS 3.4.3) to enter a location (e.g., Baner, Pune) and radius.
+- Use Google Places API to find IT/Software companies and AI classifier to filter out noise.
+- Assume all target companies have websites and crawl them (career/contact pages) for any emails (careers, hr, jobs, info). Do not use Hunter.io.
+- Generate Company Intelligence Card and Company Fit Score using GPT-4o-mini/GPT-4o.
+- Generate custom outreach subject and body. Save to SQLite database with pipeline status tracking.
+- Display in the UI for manual review, with "Copy to Clipboard" buttons for the email subject and body. No auto-email functionality.
