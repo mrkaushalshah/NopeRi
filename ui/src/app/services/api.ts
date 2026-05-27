@@ -92,6 +92,10 @@ export class ApiService {
     return this.http.get<Company>(`${this.baseUrl}/companies/${companyId}`);
   }
 
+  deleteCompany(companyId: string): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/companies/${companyId}`);
+  }
+
 
   updateEmailStatus(emailId: string, sentStatus: string): Observable<any> {
     return this.http.put(`${this.baseUrl}/emails/${emailId}/status`, { sent_status: sentStatus });

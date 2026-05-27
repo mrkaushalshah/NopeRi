@@ -202,7 +202,7 @@
             </thead>
             <tbody class="divide-y divide-white/[0.06]">
               @for (company of paginatedCompanies; track company.id) {
-                <tr app-company-card [company]="company" (statusChanged)="onStatusChanged()" class="hover:bg-white/[0.02] transition-colors"></tr>
+                <tr app-company-card [company]="company" (statusChanged)="onStatusChanged()" (deleted)="onCompanyDeleted($event)" class="hover:bg-white/[0.02] transition-colors"></tr>
               }
             </tbody>
           </table>

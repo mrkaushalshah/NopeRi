@@ -50,7 +50,7 @@ active_searches = set()
 def background_pipeline(client: LocalOutreachClient, location: str, radius: int, db: OutreachDB, mode: str):
     active_searches.add(location)
     try:
-        for batch in client.run_pipeline_batched(location, radius, batch_size=1, mode=mode):
+        for batch in client.run_pipeline_batched(location, radius, batch_size=3, mode=mode):
             for company in batch:
                 company["search_location"] = location
                 company["search_radius"] = radius
@@ -164,6 +164,15 @@ async def get_company(company_id: str):
         except (json.JSONDecodeError, TypeError):
             company["intelligence_card"] = {}
     return company
+
+
+@app.delete("/api/companies/{company_id}")
+async def delete_company(company_id: str):
+    """Delete a company and its emails."""
+    success = db.delete_company(company_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Company not found")
+    return {"status": "deleted", "company_id": company_id}
 
 
 @app.put("/api/companies/{company_id}/status")

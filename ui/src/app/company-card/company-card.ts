@@ -11,9 +11,11 @@ import { Company, ApiService } from '../services/api';
 export class CompanyCard {
   @Input() company!: Company;
   @Output() statusChanged = new EventEmitter<void>();
+  @Output() deleted = new EventEmitter<string>();
 
   copiedField: string | null = null;
   isUpdating = false;
+  isDeleting = false;
 
   constructor(private api: ApiService) {}
 
@@ -29,6 +31,21 @@ export class CompanyCard {
         this.isUpdating = false;
       }
     });
+  }
+
+  deleteEntry() {
+    if (confirm(`Are you sure you want to delete ${this.company.name}?`)) {
+      this.isDeleting = true;
+      this.api.deleteCompany(this.company.id).subscribe({
+        next: () => {
+          this.isDeleting = false;
+          this.deleted.emit(this.company.id);
+        },
+        error: () => {
+          this.isDeleting = false;
+        }
+      });
+    }
   }
 
   get emails(): string[] {
@@ -123,5 +140,17 @@ export class CompanyCard {
   openGoogleMaps() {
     const query = encodeURIComponent(this.company.name + ' ' + (this.company.address || ''));
     window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
+  }
+
+  openInZohoMail() {
+    if (!this.emails.length) return;
+    const to = this.emails[0];
+    const subject = encodeURIComponent(this.emailSubject);
+    const body = encodeURIComponent(this.emailBody);
+    
+    // mailto: opens the default email client (which can be Zoho Mail if configured).
+    // It's the most reliable way to preserve body formatting and line breaks.
+    const mailtoUrl = `mailto:${to}?subject=${subject}&body=${body}`;
+    window.open(mailtoUrl, '_blank');
   }
 }

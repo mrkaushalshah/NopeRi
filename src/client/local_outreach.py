@@ -374,7 +374,7 @@ Return JSON:
         return None
 
     # ─── FULL PIPELINE ──────────────────────────────────────────
-    def run_pipeline_batched(self, location: str, radius: int = 10, batch_size: int = 1, mode: str = "production"):
+    def run_pipeline_batched(self, location: str, radius: int = 10, batch_size: int = 3, mode: str = "production"):
         """
         Yields batches of enriched companies (size=5) for real-time DB updating.
         If mode is 'development', stops after the first batch.

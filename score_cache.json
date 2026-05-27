@@ -1138,5 +1138,93 @@
   "270526913396": {
     "score": 30,
     "reason": "Familiar tech present but heavily dominated by Java, candidate's core stack is not aligned"
+  },
+  "240426009093": {
+    "score": 0,
+    "reason": "Pure Python role with specific requirements, no overlap"
+  },
+  "270526031757": {
+    "score": 0,
+    "reason": "Pure Python role, no overlap with candidate's stack"
+  },
+  "270526026482": {
+    "score": 0,
+    "reason": "Pure Python role, no overlap with candidate's stack"
+  },
+  "270526500367": {
+    "score": 0,
+    "reason": "No relevant tech stack, role is focused on QNX"
+  },
+  "270526500946": {
+    "score": 50,
+    "reason": "Angular role but requires Vue.js and has a lower experience requirement (2-5 yrs)"
+  },
+  "270526501225": {
+    "score": 50,
+    "reason": "JavaScript role with Angular and Node.js optional, but heavily focused on Java"
+  },
+  "270526924241": {
+    "score": 30,
+    "reason": "Java dominant role with some Angular, but not a strong fit"
+  },
+  "270526502414": {
+    "score": 0,
+    "reason": "Pure QA testing role, candidate is a developer."
+  },
+  "270526019899": {
+    "score": 90,
+    "reason": "Angular frontend developer role, strong match."
+  },
+  "270526028258": {
+    "score": 30,
+    "reason": "Focus on SAP technologies, minimal overlap with core stack."
+  },
+  "270526501845": {
+    "score": 30,
+    "reason": "Role focused on Python and Vue.js, minimal overlap with core stack."
+  },
+  "270526014214": {
+    "score": 0,
+    "reason": "Java role, no overlap with core stack."
+  },
+  "270526019210": {
+    "score": 30,
+    "reason": "Familiar tech present but primarily focused on Python and React, which are not core to the candidate's stack."
+  },
+  "270526022616": {
+    "score": 0,
+    "reason": "Role does not align with candidate's tech stack, focused on cloud management."
+  },
+  "270526018784": {
+    "score": 0,
+    "reason": "Role is heavily PHP-focused, no overlap with candidate's core stack."
+  },
+  "270526015983": {
+    "score": 0,
+    "reason": "Role is focused on Java, no overlap with candidate's core stack."
+  },
+  "270526500162": {
+    "score": 0,
+    "reason": "Zero stack overlap, primarily Java and Spring Boot"
+  },
+  "270526502308": {
+    "score": 0,
+    "reason": "Sharepoint Developer role, candidate is a developer"
+  },
+  "270526503206": {
+    "score": 50,
+    "reason": "Senior Product Software Engineer role, some overlap but vague and lacks core stack"
+  },
+  "270526502646": {
+    "score": 0,
+    "reason": "Zero stack overlap, mandatory printing and ERP"
+  },
+  "270526502997": {
+    "score": 30,
+    "reason": "Role is vague with no relevant tech stack overlap."
+  },
+  "270526502375": {
+    "score": 95,
+    "reason": "Dot Net Developer role, strong match with .NET and C#"
   }
 }

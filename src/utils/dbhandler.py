@@ -246,6 +246,17 @@ class OutreachDB:
         finally:
             conn.close()
 
+    def delete_company(self, company_id):
+        conn = self._connect()
+        cursor = conn.cursor()
+        try:
+            cursor.execute("DELETE FROM outreach_emails WHERE company_id = ?", (company_id,))
+            cursor.execute("DELETE FROM companies WHERE id = ?", (company_id,))
+            conn.commit()
+            return cursor.rowcount > 0
+        finally:
+            conn.close()
+
     def update_email_status(self, email_id, sent_status):
         conn = self._connect()
         cursor = conn.cursor()

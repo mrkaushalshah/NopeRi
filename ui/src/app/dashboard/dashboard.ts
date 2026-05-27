@@ -179,6 +179,11 @@ export class Dashboard implements OnInit, OnDestroy {
     });
   }
 
+  onCompanyDeleted(companyId: string) {
+    this.companies = this.companies.filter(c => c.id !== companyId);
+    this.onStatusChanged();
+  }
+
   get funnelPercentage(): number {
     if (!this.stats.discovered) return 0;
     return Math.round((this.stats.drafted / this.stats.discovered) * 100);
