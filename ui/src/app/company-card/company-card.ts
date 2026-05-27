@@ -1,17 +1,35 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Company } from '../services/api';
+import { Company, ApiService } from '../services/api';
 
 @Component({
-  selector: 'app-company-card',
+  selector: '[app-company-card]',
   imports: [CommonModule],
   templateUrl: './company-card.html',
   styleUrl: './company-card.css',
 })
 export class CompanyCard {
   @Input() company!: Company;
+  @Output() statusChanged = new EventEmitter<void>();
 
   copiedField: string | null = null;
+  isUpdating = false;
+
+  constructor(private api: ApiService) {}
+
+  markAsSent() {
+    this.isUpdating = true;
+    this.api.updateCompanyStatus(this.company.id, 'sent_manually').subscribe({
+      next: () => {
+        this.company.status = 'sent_manually';
+        this.isUpdating = false;
+        this.statusChanged.emit();
+      },
+      error: () => {
+        this.isUpdating = false;
+      }
+    });
+  }
 
   get emails(): string[] {
     if (!this.company.outreach_emails?.length) return [];

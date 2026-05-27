@@ -63,10 +63,11 @@ export class ApiService {
 
   constructor(private http: HttpClient) {}
 
-  searchCompanies(location: string, radius: number): Observable<SearchResponse> {
+  searchCompanies(location: string, radius: number, mode: string = 'development'): Observable<SearchResponse> {
     const params = new HttpParams()
       .set('location', location)
-      .set('radius', radius.toString());
+      .set('radius', radius.toString())
+      .set('mode', mode);
     return this.http.get<SearchResponse>(`${this.baseUrl}/search`, { params });
   }
 
@@ -83,13 +84,14 @@ export class ApiService {
     return this.http.get<CompaniesResponse>(`${this.baseUrl}/companies`, { params });
   }
 
+  updateCompanyStatus(companyId: string, status: string): Observable<any> {
+    return this.http.patch(`${this.baseUrl}/companies/${companyId}/status`, { status });
+  }
+
   getCompany(companyId: string): Observable<Company> {
     return this.http.get<Company>(`${this.baseUrl}/companies/${companyId}`);
   }
 
-  updateCompanyStatus(companyId: string, status: string): Observable<any> {
-    return this.http.put(`${this.baseUrl}/companies/${companyId}/status`, { status });
-  }
 
   updateEmailStatus(emailId: string, sentStatus: string): Observable<any> {
     return this.http.put(`${this.baseUrl}/emails/${emailId}/status`, { sent_status: sentStatus });

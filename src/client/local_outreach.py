@@ -333,7 +333,7 @@ Return JSON:
 
         profile_summary = json.dumps(profile, indent=2) if profile else "No profile available"
 
-        prompt = f"""Draft a cold outreach email to a company's HR/careers team for job opportunities.
+        prompt = f"""Draft a cold outreach email to a company's HR/careers team for job opportunities on behalf of Kaushal Shah.
 
 Company Info:
 - Name: {company.get('name')}
@@ -345,10 +345,14 @@ Candidate Profile:
 {profile_summary}
 
 Rules:
-- Subject: Short, specific, and professional. Mention the candidate's core stack and the company name.
-- Body: 4-6 sentences max. Reference the company by name. Highlight 2-3 relevant skills. Mention being locally based (Pune). End with a soft call-to-action.
-- Tone: Professional but warm. Not generic. Not pushy.
-- Do NOT include placeholders like [Your Name] — use actual data from the profile.
+- Subject: MUST be exactly "Job Application - [Custom Designation Name] - Kaushal Shah". (Determine the best matching designation based on candidate's skills and company type, e.g. "Full-Stack Developer (Angular & .NET)").
+- Body: Keep it concise and punchy (3-4 paragraphs max). Introduce Kaushal Shah and focus on the unique value he brings to the table and how he can be a valuable asset to their specific team.
+- Important Rules:
+  1. DO NOT mention Current CTC or Expected CTC.
+  2. DO NOT state a preference for remote/hybrid. Explicitly state he is based in Pune and open to in-office roles.
+  3. Format his skills properly, using comma seperated under the respective categories (e.g. Frontend, Backend, AI/Tools).
+  4. DO NOT include placeholders like [Your Contact Information] — only use "Kaushal Shah".
+  5. Ensure you explicitly mention that his resume is attached to the email.
 
 Return JSON:
 {{
@@ -370,12 +374,13 @@ Return JSON:
         return None
 
     # ─── FULL PIPELINE ──────────────────────────────────────────
-    def run_pipeline_batched(self, location: str, radius: int = 10, batch_size: int = 5):
+    def run_pipeline_batched(self, location: str, radius: int = 10, batch_size: int = 1, mode: str = "production"):
         """
         Yields batches of enriched companies (size=5) for real-time DB updating.
+        If mode is 'development', stops after the first batch.
         """
         print(f"\n{'='*60}")
-        print(f"  LOCAL OUTREACH PIPELINE: {location} ({radius}km)")
+        print(f"  LOCAL OUTREACH PIPELINE: {location} ({radius}km) [Mode: {mode.upper()}]")
         print(f"{'='*60}")
 
         print("\n[1/4] Searching Google Places...")
@@ -426,4 +431,8 @@ Return JSON:
 
             print(f"[4/4] Yielding batch to pipeline...")
             yield enriched
+
+            if mode == 'development':
+                print(f"  [DEVELOPMENT MODE] Stopping after first batch.")
+                break
 

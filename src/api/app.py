@@ -47,10 +47,10 @@ from fastapi import BackgroundTasks
 # Store active searches globally
 active_searches = set()
 
-def background_pipeline(client: LocalOutreachClient, location: str, radius: int, db: OutreachDB):
+def background_pipeline(client: LocalOutreachClient, location: str, radius: int, db: OutreachDB, mode: str):
     active_searches.add(location)
     try:
-        for batch in client.run_pipeline_batched(location, radius, batch_size=5):
+        for batch in client.run_pipeline_batched(location, radius, batch_size=1, mode=mode):
             for company in batch:
                 company["search_location"] = location
                 company["search_radius"] = radius
@@ -84,7 +84,8 @@ def background_pipeline(client: LocalOutreachClient, location: str, radius: int,
 async def search_companies(
     background_tasks: BackgroundTasks,
     location: str = Query(..., description="Location string, e.g. 'Baner, Pune'"),
-    radius: int = Query(10, description="Search radius in km", ge=1, le=50)
+    radius: int = Query(10, description="Search radius in km", ge=1, le=50),
+    mode: str = Query("development", description="Mode: 'development' or 'production'")
 ):
     """
     Start the full pipeline in the background: search Google Places -> scrape websites -> AI enrich -> store in DB.
@@ -92,18 +93,19 @@ async def search_companies(
     """
     try:
         if location in active_searches:
-             return {"status": "already_running", "location": location, "radius": radius}
+             return {"status": "already_running", "location": location, "radius": radius, "mode": mode}
 
         ai = AIHandler()
         ai.extract_profile()
         client = LocalOutreachClient(ai_handler=ai)
 
-        background_tasks.add_task(background_pipeline, client, location, radius, db)
+        background_tasks.add_task(background_pipeline, client, location, radius, db, mode)
 
         return {
             "status": "started",
             "location": location,
-            "radius": radius
+            "radius": radius,
+            "mode": mode
         }
 
     except ValueError as e:
@@ -130,6 +132,25 @@ async def get_companies(
         "total": len(companies)
     }
 
+
+class StatusUpdate(BaseModel):
+    status: str
+
+@app.patch("/api/companies/{company_id}/status")
+async def update_company_status(company_id: str, update: StatusUpdate):
+    """Update the status of a company (e.g. 'sent_manually')."""
+    success = db.update_company_status(company_id, update.status)
+    if not success:
+        raise HTTPException(status_code=404, detail="Company not found")
+    
+    # Also update email status if it's sent
+    if update.status == 'sent_manually':
+        company = db.get_company_with_emails(company_id)
+        if company and company.get("outreach_emails"):
+            for email in company["outreach_emails"]:
+                db.update_email_status(email["id"], "sent")
+                
+    return {"status": "updated"}
 
 @app.get("/api/companies/{company_id}")
 async def get_company(company_id: str):

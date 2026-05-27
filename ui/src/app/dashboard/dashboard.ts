@@ -14,6 +14,7 @@ export class Dashboard implements OnInit, OnDestroy {
   // Search state
   searchLocation = '';
   searchRadius = 10;
+  searchMode = 'development';
   isSearching = false;
   searchError = '';
 
@@ -25,6 +26,9 @@ export class Dashboard implements OnInit, OnDestroy {
   // UI state
   activeFilter = 'all';
   isLoaded = false;
+  searchQuery = '';
+  currentPage = 1;
+  itemsPerPage = 10;
 
   constructor(private api: ApiService) { }
 
@@ -69,46 +73,48 @@ export class Dashboard implements OnInit, OnDestroy {
     this.searchError = '';
     const loc = this.searchLocation.trim();
 
-    this.api.searchCompanies(loc, this.searchRadius).subscribe({
+    this.api.searchCompanies(loc, this.searchRadius, this.searchMode).subscribe({
       next: (res) => {
         // Reload full company list right away in case we already have some data
         this.api.getCompanies(loc).subscribe({
-          next: (compRes) => {
-            this.companies = compRes.companies;
-            this.stats = compRes.stats;
+          next: (dbRes) => {
+            this.companies = dbRes.companies;
+            this.stats = dbRes.stats;
+            this.currentPage = 1; // reset pagination
           }
         });
 
-        // Start polling for new data
+        // Start polling for updates every 5s while search is running
         this.pollInterval = setInterval(() => {
-          this.api.getCompanies(loc).subscribe(compRes => {
-            this.companies = compRes.companies;
-            this.stats = compRes.stats;
-          });
-
-          this.api.checkSearchStatus(loc).subscribe(statusRes => {
-            if (!statusRes.is_searching) {
+          this.api.checkSearchStatus(loc).subscribe(status => {
+            if (!status.is_searching) {
               clearInterval(this.pollInterval);
               this.isSearching = false;
-              this.loadLocations();
             }
+            // Fetch latest DB state
+            this.api.getCompanies(loc).subscribe({
+              next: (latest) => {
+                this.companies = latest.companies;
+                this.stats = latest.stats;
+              }
+            });
           });
-        }, 5000); // Poll every 5 seconds
+        }, 5000);
       },
       error: (err) => {
+        this.searchError = err.error?.detail || 'Search failed to start';
         this.isSearching = false;
-        this.searchError = err.error?.detail || 'Search failed. Check your API key and try again.';
       }
     });
   }
 
-  filterByLocation(location: string) {
-    this.searchLocation = location;
-    this.api.getCompanies(location).subscribe({
+  filterByLocation(loc: string) {
+    this.searchLocation = loc;
+    this.api.getCompanies(loc).subscribe({
       next: (res) => {
         this.companies = res.companies;
-        console.log(this.companies)
         this.stats = res.stats;
+        this.currentPage = 1;
       }
     });
   }
@@ -116,17 +122,59 @@ export class Dashboard implements OnInit, OnDestroy {
   showAll() {
     this.searchLocation = '';
     this.loadExistingData();
+    this.currentPage = 1;
   }
 
   get filteredCompanies(): Company[] {
-    if (this.activeFilter === 'all') return this.companies;
-    return this.companies.filter(c => {
-      switch (this.activeFilter) {
-        case 'ready': return c.status === 'outreach_ready';
-        case 'high-score': return (c.fit_score || 0) >= 70;
-        case 'with-email': return c.outreach_emails?.some(e => e.email_subject);
-        case 'sent': return c.status === 'sent_manually';
-        default: return true;
+    let filtered = this.companies;
+    
+    // Apply status filter
+    if (this.activeFilter !== 'all') {
+      filtered = filtered.filter(c => {
+        switch (this.activeFilter) {
+          case 'ready': return c.status === 'outreach_ready';
+          case 'high-score': return (c.fit_score || 0) >= 70;
+          case 'with-email': return c.outreach_emails?.some(e => e.email_subject);
+          case 'sent': return c.status === 'sent_manually';
+          default: return true;
+        }
+      });
+    }
+
+    // Apply search query filter
+    if (this.searchQuery.trim()) {
+      const q = this.searchQuery.toLowerCase().trim();
+      filtered = filtered.filter(c => 
+        c.name?.toLowerCase().includes(q) || 
+        c.address?.toLowerCase().includes(q) ||
+        c.website?.toLowerCase().includes(q)
+      );
+    }
+    
+    return filtered;
+  }
+
+  get paginatedCompanies(): Company[] {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    return this.filteredCompanies.slice(startIndex, startIndex + this.itemsPerPage);
+  }
+  
+  get totalPages(): number {
+    return Math.ceil(this.filteredCompanies.length / this.itemsPerPage);
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) this.currentPage++;
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) this.currentPage--;
+  }
+
+  onStatusChanged() {
+    this.api.getCompanies(this.searchLocation || undefined).subscribe({
+      next: (res) => {
+        this.stats = res.stats;
       }
     });
   }
