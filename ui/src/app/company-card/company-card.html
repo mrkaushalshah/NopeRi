@@ -1,0 +1,129 @@
+<!-- Company Intelligence Card -->
+<div class="glass-card group relative overflow-hidden">
+  <!-- Top accent bar -->
+  <div class="h-1 w-full" [ngClass]="{
+    'bg-gradient-to-r from-green-500 to-emerald-400': company.fit_score >= 70,
+    'bg-gradient-to-r from-amber-500 to-yellow-400': company.fit_score >= 40 && company.fit_score < 70,
+    'bg-gradient-to-r from-red-500 to-rose-400': company.fit_score < 40
+  }"></div>
+
+  <div class="p-6">
+    <!-- Header Row -->
+    <div class="flex items-start justify-between gap-4 mb-4">
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 mb-1">
+          <h3 class="font-display text-lg font-semibold text-white truncate">
+            {{ company.name }}
+          </h3>
+          <span class="status-pill text-[10px] uppercase tracking-wider opacity-80">
+            {{ statusIcon }} {{ statusLabel }}
+          </span>
+        </div>
+        <p class="text-sm text-stone-400 truncate">
+          📍 {{ company.address || company.location }}
+        </p>
+      </div>
+
+      <!-- Fit Score Badge -->
+      <div class="flex-shrink-0 text-center">
+        <div class="score-badge text-base font-bold px-4 py-2" [ngClass]="scoreClass">
+          {{ company.fit_score || 0 }}
+        </div>
+        <span class="text-[10px] text-stone-500 block mt-1 uppercase tracking-wider">{{ scoreLabel }}</span>
+      </div>
+    </div>
+
+    <!-- Quick Info Row -->
+    <div class="flex flex-wrap items-center gap-3 mb-5 text-xs text-stone-400">
+      <!-- Google Rating -->
+      @if (company.google_rating) {
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/[0.06]">
+          <span class="text-amber-400">{{ ratingStars }}</span>
+          <span>{{ company.google_rating }}</span>
+        </span>
+      }
+
+      <!-- Website -->
+      @if (company.website) {
+        <button (click)="openWebsite()"
+                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/[0.06] hover:border-indigo-500/30 hover:text-indigo-300 transition-colors cursor-pointer">
+          🌐 Website
+        </button>
+      }
+
+      <!-- Maps -->
+      <button (click)="openGoogleMaps()"
+              class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/[0.06] hover:border-indigo-500/30 hover:text-indigo-300 transition-colors cursor-pointer">
+        🗺️ Maps
+      </button>
+
+      <!-- Company Type -->
+      @if (intelligenceCard?.company_type) {
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/[0.06] capitalize">
+          🏢 {{ intelligenceCard.company_type }}
+        </span>
+      }
+    </div>
+
+    <!-- Fit Reasoning -->
+    @if (company.fit_reasoning) {
+      <div class="mb-5 p-3 rounded-lg bg-white/[0.02] border border-white/[0.04] text-xs text-stone-400 leading-relaxed">
+        <span class="text-stone-500 font-medium uppercase tracking-wider text-[10px]">AI Analysis</span>
+        <p class="mt-1">{{ company.fit_reasoning }}</p>
+      </div>
+    }
+
+    <!-- Extracted Emails -->
+    @if (emails.length > 0) {
+      <div class="mb-5">
+        <span class="text-[10px] text-stone-500 font-medium uppercase tracking-wider block mb-2">Contact Emails</span>
+        <div class="flex flex-wrap gap-2">
+          @for (email of emails; track email) {
+            <button (click)="copyToClipboard(email, 'email-' + email)"
+                    class="copy-btn text-[11px] font-mono"
+                    [class.copied]="copiedField === 'email-' + email">
+              {{ copiedField === 'email-' + email ? '✓ Copied' : email }}
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Outreach Email Draft -->
+    @if (emailSubject || emailBody) {
+      <div class="border-t border-white/[0.06] pt-5 space-y-4">
+        <span class="text-[10px] text-stone-500 font-medium uppercase tracking-wider">AI-Generated Outreach</span>
+
+        <!-- Subject -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-[10px] text-stone-500 uppercase tracking-wider">Subject</span>
+            <button (click)="copyToClipboard(emailSubject, 'subject')"
+                    class="copy-btn"
+                    [class.copied]="copiedField === 'subject'">
+              {{ copiedField === 'subject' ? '✓ Copied!' : '📋 Copy Subject' }}
+            </button>
+          </div>
+          <div class="p-3 rounded-lg bg-white/[0.03] border border-white/[0.06] text-sm text-stone-300 font-medium">
+            {{ emailSubject }}
+          </div>
+        </div>
+
+        <!-- Body -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-[10px] text-stone-500 uppercase tracking-wider">Body</span>
+            <button (click)="copyToClipboard(emailBody, 'body')"
+                    class="copy-btn"
+                    [class.copied]="copiedField === 'body'">
+              {{ copiedField === 'body' ? '✓ Copied!' : '📋 Copy Body' }}
+            </button>
+          </div>
+          <div class="p-3 rounded-lg bg-white/[0.03] border border-white/[0.06] text-sm text-stone-400 leading-relaxed whitespace-pre-line">
+            {{ emailBody }}
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,198 @@
+<div class="min-h-screen bg-surface-950 bg-grid-pattern bg-grid-20 text-stone-200 p-6 sm:p-8 lg:p-12 relative overflow-hidden">
+  <!-- Glowing background blobs -->
+  <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-glow-gradient opacity-40 pointer-events-none"></div>
+  <div class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-glow-gradient opacity-30 pointer-events-none"></div>
+
+  <!-- Max-width container -->
+  <div class="max-w-7xl mx-auto space-y-10 relative z-10">
+
+    <!-- Header Section -->
+    <header class="flex flex-col md:flex-row md:items-center md:justify-between gap-6 border-b border-white/[0.06] pb-8 animate-fade-in">
+      <div>
+        <h1 class="text-4xl md:text-5xl font-display font-bold tracking-tight text-white mb-2">
+          Local IT Company <span class="text-gradient">Outreach Engine</span>
+        </h1>
+        <p class="text-stone-400 max-w-xl">
+          Discover local software companies, scrape contact emails from their web pages, and generate highly targeted outreach drafts using AI.
+        </p>
+      </div>
+
+      <!-- Quick Action Stats -->
+      <div class="flex items-center gap-3">
+        @if (savedLocations.length > 0) {
+          <div class="flex flex-wrap gap-2 max-w-xs md:max-w-md">
+            <span class="text-xs text-stone-500 font-medium uppercase tracking-wider block self-center mr-1">Searches</span>
+            @for (loc of savedLocations; track loc) {
+              <button (click)="filterByLocation(loc)" 
+                      class="px-3 py-1.5 rounded-lg text-xs font-medium border transition-all duration-200 cursor-pointer"
+                      [class.bg-accent]="searchLocation === loc"
+                      [class.text-white]="searchLocation === loc"
+                      [class.border-accent]="searchLocation === loc"
+                      [class.border-white]="searchLocation !== loc"
+                      [class.bg-white]="searchLocation !== loc"
+                      [class.hover:bg-white]="searchLocation !== loc">
+                {{ loc }}
+              </button>
+            }
+            @if (searchLocation) {
+              <button (click)="showAll()" class="text-xs text-stone-500 hover:text-stone-300 font-medium transition-colors cursor-pointer self-center">
+                Clear Filters
+              </button>
+            }
+          </div>
+        }
+      </div>
+    </header>
+
+    <!-- Search Controls -->
+    <section class="glass-card p-6 md:p-8 animate-slide-up stagger-1">
+      <h2 class="text-lg font-semibold font-display text-white mb-4">Start Local Search</h2>
+      <form (submit)="onSearch()" class="flex flex-col md:flex-row gap-4 items-end">
+        
+        <!-- Location Input -->
+        <div class="flex-1 space-y-1.5 w-full">
+          <label for="location" class="text-xs text-stone-500 font-medium uppercase tracking-wider">Target Location</label>
+          <input type="text" 
+                 id="location" 
+                 name="location"
+                 [(ngModel)]="searchLocation" 
+                 placeholder="e.g. Baner, Pune" 
+                 class="input-field"
+                 required />
+        </div>
+
+        <!-- Radius Input -->
+        <div class="w-full md:w-48 space-y-1.5">
+          <label for="radius" class="text-xs text-stone-500 font-medium uppercase tracking-wider">Search Radius (km)</label>
+          <select id="radius" 
+                  name="radius"
+                  [(ngModel)]="searchRadius" 
+                  class="input-field cursor-pointer">
+            <option [value]="2">2 km</option>
+            <option [value]="5">5 km</option>
+            <option [value]="10">10 km</option>
+            <option [value]="15">15 km</option>
+            <option [value]="20">20 km</option>
+          </select>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" 
+                [disabled]="isSearching || !searchLocation"
+                class="btn-accent w-full md:w-auto h-12 flex items-center justify-center gap-2 cursor-pointer">
+          @if (isSearching) {
+            <span class="animate-spin text-white">🔄</span> Analyzing Near {{ searchLocation }}...
+          } @else {
+            🔍 Search IT Companies
+          }
+        </button>
+      </form>
+
+      @if (searchError) {
+        <p class="text-xs text-danger mt-3 bg-danger/10 border border-danger/20 p-3 rounded-lg">
+          ⚠️ {{ searchError }}
+        </p>
+      }
+    </section>
+
+    <!-- Funnel Pipeline Metrics -->
+    <section class="grid grid-cols-2 md:grid-cols-5 gap-4 animate-slide-up stagger-2">
+      <!-- Discovered -->
+      <div class="metric-card space-y-1">
+        <span class="text-stone-500 text-[10px] uppercase font-semibold tracking-wider">Discovered</span>
+        <div class="text-3xl font-display font-bold text-white">{{ stats.discovered }}</div>
+        <p class="text-[10px] text-stone-400">Total IT places found</p>
+      </div>
+
+      <!-- Websites Found -->
+      <div class="metric-card space-y-1">
+        <span class="text-stone-500 text-[10px] uppercase font-semibold tracking-wider">Websites</span>
+        <div class="text-3xl font-display font-bold text-white">{{ stats.website_found }}</div>
+        <p class="text-[10px] text-stone-400">Places with websites</p>
+      </div>
+
+      <!-- Emails Extracted -->
+      <div class="metric-card space-y-1">
+        <span class="text-stone-500 text-[10px] uppercase font-semibold tracking-wider">Emails Found</span>
+        <div class="text-3xl font-display font-bold text-white">{{ stats.email_found }}</div>
+        <p class="text-[10px] text-stone-400">Scraped from web pages</p>
+      </div>
+
+      <!-- Drafts Ready -->
+      <div class="metric-card space-y-1">
+        <span class="text-stone-500 text-[10px] uppercase font-semibold tracking-wider">AI Drafts Ready</span>
+        <div class="text-3xl font-display font-bold text-white">{{ stats.drafted }}</div>
+        <p class="text-[10px] text-stone-400">Targeted cold drafts ready</p>
+      </div>
+
+      <!-- Funnel Efficiency / Conversions -->
+      <div class="metric-card space-y-1 bg-gradient-to-br from-indigo-950/40 to-stone-900 border-indigo-500/20">
+        <span class="text-indigo-400 text-[10px] uppercase font-semibold tracking-wider">Pipeline Yield</span>
+        <div class="text-3xl font-display font-bold text-gradient">{{ funnelPercentage }}%</div>
+        <p class="text-[10px] text-stone-400">Outreach draft rate</p>
+      </div>
+    </section>
+
+    <!-- Filter Toolbar -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-slide-up stagger-3">
+      <!-- Status Tabs -->
+      <div class="flex gap-2 bg-white/[0.03] border border-white/[0.06] p-1.5 rounded-xl">
+        <button (click)="activeFilter = 'all'" 
+                class="px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer"
+                [class.bg-white/[0.05]]="activeFilter === 'all'"
+                [class.text-white]="activeFilter === 'all'"
+                [class.text-stone-400]="activeFilter !== 'all'">
+          All ({{ companies.length }})
+        </button>
+        <button (click)="activeFilter = 'ready'" 
+                class="px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer"
+                [class.bg-white/[0.05]]="activeFilter === 'ready'"
+                [class.text-white]="activeFilter === 'ready'"
+                [class.text-stone-400]="activeFilter !== 'ready'">
+          Ready ({{ stats.drafted }})
+        </button>
+        <button (click)="activeFilter = 'high-score'" 
+                class="px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer"
+                [class.bg-white/[0.05]]="activeFilter === 'high-score'"
+                [class.text-white]="activeFilter === 'high-score'"
+                [class.text-stone-400]="activeFilter !== 'high-score'">
+          Strong Fit
+        </button>
+        <button (click)="activeFilter = 'sent'" 
+                class="px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer"
+                [class.bg-white/[0.05]]="activeFilter === 'sent'"
+                [class.text-white]="activeFilter === 'sent'"
+                [class.text-stone-400]="activeFilter !== 'sent'">
+          Sent ({{ stats.sent }})
+        </button>
+      </div>
+
+      <div class="text-xs text-stone-400 font-medium">
+        Showing {{ filteredCompanies.length }} company card(s)
+      </div>
+    </div>
+
+    <!-- Company Grid List -->
+    <section class="animate-slide-up stagger-4">
+      @if (filteredCompanies.length > 0) {
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          @for (company of filteredCompanies; track company.id) {
+            <app-company-card [company]="company" />
+          }
+        </div>
+      } @else {
+        <!-- Empty State -->
+        <div class="glass-card flex flex-col items-center justify-center p-16 text-center">
+          <div class="w-16 h-16 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-2xl mb-4">
+            🏢
+          </div>
+          <h3 class="text-lg font-display text-white font-semibold mb-2">No companies discovered yet</h3>
+          <p class="text-stone-400 max-w-sm text-sm">
+            Enter a target location string (e.g. "Kharadi, Pune") above and run a search to fetch local companies and scrape cold email opportunities.
+          </p>
+        </div>
+      }
+    </section>
+
+  </div>
+</div>

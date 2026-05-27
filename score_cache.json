@@ -1122,5 +1122,21 @@
   "260526935712": {
     "score": 70,
     "reason": "Node.js backend role with TypeScript, strong fit but slightly different experience requirement (2-6 yrs)"
+  },
+  "270526011607": {
+    "score": 95,
+    "reason": "Pure Angular frontend developer, perfect match"
+  },
+  "270526011104": {
+    "score": 0,
+    "reason": "Zero stack overlap, candidate is a developer"
+  },
+  "270526011925": {
+    "score": 90,
+    "reason": ".NET Developer role with relevant tech stack, strong fit."
+  },
+  "270526913396": {
+    "score": 30,
+    "reason": "Familiar tech present but heavily dominated by Java, candidate's core stack is not aligned"
   }
 }

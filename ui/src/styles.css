@@ -1,0 +1,216 @@
+/* ─── Custom Fonts: Clash Display + DM Sans ─── */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=clash-display@200,300,400,500,600,700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Base Layer Overrides ─── */
+@layer base {
+  :root {
+    --bg-primary: #0F0E0D;
+    --bg-secondary: #1C1917;
+    --bg-card: #1E1D1B;
+    --bg-card-hover: #252422;
+    --text-primary: #FAF9F7;
+    --text-secondary: #A8A29E;
+    --text-muted: #78716C;
+    --accent: #6366F1;
+    --accent-light: #818CF8;
+    --accent-glow: rgba(99, 102, 241, 0.15);
+    --border: rgba(255, 255, 255, 0.06);
+    --border-hover: rgba(255, 255, 255, 0.12);
+    --success: #22C55E;
+    --warning: #F59E0B;
+    --danger: #EF4444;
+    --radius: 12px;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Clash Display', 'DM Sans', sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+}
+
+/* ─── Component Layer ─── */
+@layer components {
+  /* Glass card effect */
+  .glass-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .glass-card:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--border-hover);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2), 0 0 40px var(--accent-glow);
+    transform: translateY(-2px);
+  }
+
+  /* Accent button */
+  .btn-accent {
+    @apply px-6 py-3 rounded-xl font-medium text-white transition-all duration-300;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+    box-shadow: 0 2px 12px rgba(99, 102, 241, 0.3);
+  }
+
+  .btn-accent:hover {
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.5);
+    transform: translateY(-1px);
+  }
+
+  .btn-accent:active {
+    transform: translateY(0);
+  }
+
+  .btn-accent:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* Ghost button */
+  .btn-ghost {
+    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+  }
+
+  .btn-ghost:hover {
+    color: var(--text-primary);
+    border-color: var(--border-hover);
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  /* Input field */
+  .input-field {
+    @apply w-full px-4 py-3 rounded-xl text-sm transition-all duration-200;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .input-field::placeholder {
+    color: var(--text-muted);
+  }
+
+  .input-field:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  /* Score badge */
+  .score-badge {
+    @apply inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold;
+  }
+
+  .score-high {
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ADE80;
+  }
+
+  .score-mid {
+    background: rgba(245, 158, 11, 0.15);
+    color: #FBBF24;
+  }
+
+  .score-low {
+    background: rgba(239, 68, 68, 0.15);
+    color: #F87171;
+  }
+
+  /* Status pill */
+  .status-pill {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium;
+    border: 1px solid var(--border);
+  }
+
+  /* Copy button animation */
+  .copy-btn {
+    @apply px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer;
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--accent-light);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+  }
+
+  .copy-btn:hover {
+    background: rgba(99, 102, 241, 0.2);
+    border-color: rgba(99, 102, 241, 0.4);
+  }
+
+  .copy-btn.copied {
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ADE80;
+    border-color: rgba(34, 197, 94, 0.3);
+  }
+
+  /* Metric card */
+  .metric-card {
+    @apply p-5 rounded-xl;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+}
+
+/* ─── Utility Layer ─── */
+@layer utilities {
+  .text-gradient {
+    background: linear-gradient(135deg, var(--accent-light) 0%, #C084FC 50%, #F472B6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .stagger-1 { animation-delay: 0.1s; }
+  .stagger-2 { animation-delay: 0.2s; }
+  .stagger-3 { animation-delay: 0.3s; }
+  .stagger-4 { animation-delay: 0.4s; }
+  .stagger-5 { animation-delay: 0.5s; }
+}

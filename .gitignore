@@ -11,6 +11,8 @@ __pycache__/
 venv/
 .env/
 .venv/
+.agents
+skills-lock.json
 
 # Logs
 *.log
