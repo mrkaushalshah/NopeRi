@@ -50,7 +50,7 @@ active_searches = set()
 def background_pipeline(client: LocalOutreachClient, location: str, radius: int, db: OutreachDB, mode: str):
     active_searches.add(location)
     try:
-        for batch in client.run_pipeline_batched(location, radius, batch_size=3, mode=mode):
+        for batch in client.run_pipeline_batched(location, radius, batch_size=1, mode=mode):
             for company in batch:
                 company["search_location"] = location
                 company["search_radius"] = radius

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService, Company, PipelineStats } from '../services/api';
@@ -30,7 +30,7 @@ export class Dashboard implements OnInit, OnDestroy {
   currentPage = 1;
   itemsPerPage = 10;
 
-  constructor(private api: ApiService) { }
+  constructor(private api: ApiService, private cdr: ChangeDetectorRef) { }
 
   ngOnInit() {
     this.loadExistingData();
@@ -43,10 +43,12 @@ export class Dashboard implements OnInit, OnDestroy {
         this.companies = res.companies;
         this.stats = res.stats;
         this.isLoaded = true;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Failed to load companies:', err);
         this.isLoaded = true;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -55,6 +57,7 @@ export class Dashboard implements OnInit, OnDestroy {
     this.api.getLocations().subscribe({
       next: (res) => {
         this.savedLocations = res.locations;
+        this.cdr.detectChanges();
       },
       error: () => { }
     });
@@ -90,12 +93,14 @@ export class Dashboard implements OnInit, OnDestroy {
             if (!status.is_searching) {
               clearInterval(this.pollInterval);
               this.isSearching = false;
+              this.cdr.detectChanges();
             }
             // Fetch latest DB state
             this.api.getCompanies(loc).subscribe({
               next: (latest) => {
                 this.companies = latest.companies;
                 this.stats = latest.stats;
+                this.cdr.detectChanges();
               }
             });
           });
@@ -115,6 +120,7 @@ export class Dashboard implements OnInit, OnDestroy {
         this.companies = res.companies;
         this.stats = res.stats;
         this.currentPage = 1;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -175,6 +181,7 @@ export class Dashboard implements OnInit, OnDestroy {
     this.api.getCompanies(this.searchLocation || undefined).subscribe({
       next: (res) => {
         this.stats = res.stats;
+        this.cdr.detectChanges();
       }
     });
   }

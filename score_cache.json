@@ -1226,5 +1226,593 @@
   "270526502375": {
     "score": 95,
     "reason": "Dot Net Developer role, strong match with .NET and C#"
+  },
+  "270526503005": {
+    "score": 30,
+    "reason": "Vague role with no core stack overlap, primarily focused on system architecture and data analysis."
+  },
+  "280526501998": {
+    "score": 0,
+    "reason": "Zero stack overlap, role is focused on ReactJS and related technologies."
+  },
+  "280526505079": {
+    "score": 0,
+    "reason": "Zero stack overlap, role is focused on C++ and related technologies."
+  },
+  "270526935987": {
+    "score": 0,
+    "reason": "Zero stack overlap, role is focused on Java and C."
+  },
+  "270526935958": {
+    "score": 0,
+    "reason": "Zero stack overlap, role is focused on Java and C."
+  },
+  "300426025354": {
+    "score": 0,
+    "reason": "Zero stack overlap, role is focused on orchestration and telecom."
+  },
+  "290526906371": {
+    "score": 0,
+    "reason": "Zero stack overlap, role is focused on C and unit testing."
+  },
+  "290526004453": {
+    "score": 0,
+    "reason": "Zero stack overlap, Python & ReactJS only."
+  },
+  "280526020784": {
+    "score": 90,
+    "reason": "Dot Net Developer role with C# and .NET Core, strong match."
+  },
+  "280526018947": {
+    "score": 30,
+    "reason": "AngularJS and Java required, but Java is not in the candidate's core stack."
+  },
+  "270526504144": {
+    "score": 30,
+    "reason": "React and NextJS required, but candidate's core stack does not include React."
+  },
+  "280526927324": {
+    "score": 0,
+    "reason": "Pure QA testing role, candidate is a developer."
+  },
+  "280526018935": {
+    "score": 90,
+    "reason": "Fullstack role with Angular and generative AI, strong match."
+  },
+  "280526022673": {
+    "score": 30,
+    "reason": "Vue.js required, but candidate's core stack is Angular."
+  },
+  "280526502688": {
+    "score": 0,
+    "reason": "Zero stack overlap, Java Full stack Developer only."
+  },
+  "280526926310": {
+    "score": 30,
+    "reason": "React and UX required, but candidate's core stack does not include React."
+  },
+  "270526936037": {
+    "score": 30,
+    "reason": "Java required, but candidate's core stack does not include Java."
+  },
+  "270526040258": {
+    "score": 0,
+    "reason": "Zero stack overlap, MERN Stack role only."
+  },
+  "270526503811": {
+    "score": 0,
+    "reason": "Zero stack overlap, role does not match candidate's core stack."
+  },
+  "270526932879": {
+    "score": 30,
+    "reason": "Java required, but candidate's core stack does not include Java."
+  },
+  "270526505458": {
+    "score": 0,
+    "reason": "Zero stack overlap, role does not match candidate's core stack."
+  },
+  "290526500001": {
+    "score": 0,
+    "reason": "Zero stack overlap, primarily Python and Java"
+  },
+  "280526926747": {
+    "score": 0,
+    "reason": "Zero stack overlap, primarily Java"
+  },
+  "021225021247": {
+    "score": 50,
+    "reason": "Angular present but heavily dominated by Java"
+  },
+  "270526935959": {
+    "score": 0,
+    "reason": "Zero stack overlap, primarily Java"
+  },
+  "280526926300": {
+    "score": 90,
+    "reason": "Pure .NET Developer role, perfect match"
+  },
+  "280526502211": {
+    "score": 0,
+    "reason": "Zero stack overlap, primarily React"
+  },
+  "270526934318": {
+    "score": 0,
+    "reason": "Zero stack overlap, primarily Python and ASP.NET"
+  },
+  "280526502098": {
+    "score": 0,
+    "reason": "Zero stack overlap, primarily PHP and Ruby"
+  },
+  "280526502955": {
+    "score": 0,
+    "reason": "Zero stack overlap, primarily QA role"
+  },
+  "280526502052": {
+    "score": 0,
+    "reason": "Zero stack overlap, primarily ServiceNow"
+  },
+  "280526926308": {
+    "score": 0,
+    "reason": "Zero stack overlap, primarily Java"
+  },
+  "280526502806": {
+    "score": 0,
+    "reason": "Zero stack overlap, primarily medical and non-IT"
+  },
+  "280526031468": {
+    "score": 0,
+    "reason": "Zero stack overlap, role focused on JavaScript and AI with no relevant tech"
+  },
+  "280526503215": {
+    "score": 50,
+    "reason": "Vague full stack role with no specific mention of core technologies, experience slightly off"
+  },
+  "280526503475": {
+    "score": 0,
+    "reason": "Zero stack overlap, role focused on PHP and Laravel"
+  },
+  "280526502105": {
+    "score": 0,
+    "reason": "Zero stack overlap, role focused on Java and Spring Boot"
+  },
+  "290526903913": {
+    "score": 0,
+    "reason": "Zero stack overlap, role focused on Java and C++"
+  },
+  "280526016193": {
+    "score": 0,
+    "reason": "Zero stack overlap, role focused on orchestration and AI without relevant tech"
+  },
+  "280526504063": {
+    "score": 0,
+    "reason": "Zero stack overlap, role focused on Java with no relevant tech"
+  },
+  "270526022472": {
+    "score": 0,
+    "reason": "Zero stack overlap, role focused on PHP"
+  },
+  "280526030183": {
+    "score": 0,
+    "reason": "Zero stack overlap, role focused on Salesforce and nCino"
+  },
+  "280526926911": {
+    "score": 0,
+    "reason": "Zero stack overlap, focuses on automation and compliance without relevant development roles"
+  },
+  "290526009580": {
+    "score": 90,
+    "reason": "Senior .NET Developer role, strong match with .NET Core and optional Angular"
+  },
+  "280526500191": {
+    "score": 30,
+    "reason": "Frontend role with backend requirements, but not aligned with candidate's stack"
+  },
+  "210526008201": {
+    "score": 30,
+    "reason": "Full Stack role but primarily focused on React, weak fit"
+  },
+  "270526935702": {
+    "score": 0,
+    "reason": "Zero stack overlap, focuses on devops and cloud without relevant development roles"
+  },
+  "280526012314": {
+    "score": 30,
+    "reason": "Familiar tech present but heavily dominated by Java, not a fit for core stack."
+  },
+  "270526035563": {
+    "score": 90,
+    "reason": "C# and .NET Core are mandatory, strong fit for backend role"
+  },
+  "280526020034": {
+    "score": 50,
+    "reason": "C# is mandatory but requires 3-5 years, candidate has 4.5 years"
+  },
+  "280526014131": {
+    "score": 50,
+    "reason": "C# is mandatory but requires 3-5 years, candidate has 4.5 years"
+  },
+  "280526021158": {
+    "score": 50,
+    "reason": "C# is mandatory but requires 3-5 years, candidate has 4.5 years"
+  },
+  "280526926797": {
+    "score": 0,
+    "reason": "Role focused on Oracle Cloud Integration, no overlap with candidate's stack"
+  },
+  "280526016380": {
+    "score": 0,
+    "reason": "Role focused on components and manuscript, no overlap with candidate's stack"
+  },
+  "270526038397": {
+    "score": 0,
+    "reason": "Zero stack overlap, Duck Creek technology only."
+  },
+  "280526011835": {
+    "score": 0,
+    "reason": "Zero stack overlap, Saviynt technology only."
+  },
+  "220526013482": {
+    "score": 0,
+    "reason": "Zero stack overlap, Quadient technology only."
+  },
+  "270526932920": {
+    "score": 50,
+    "reason": ".NET Core present but requires Kafka and messaging tools"
+  },
+  "290526002014": {
+    "score": 0,
+    "reason": "Mandatory Python, no overlap with candidate's core stack"
+  },
+  "280526926751": {
+    "score": 100,
+    "reason": ".NET Core + Angular Developer role, perfect match"
+  },
+  "280526011468": {
+    "score": 90,
+    "reason": "Pure Angular Developer role, strong match"
+  },
+  "120526024916": {
+    "score": 100,
+    "reason": "Fullstack role with mandatory .NET Core and optional Angular, perfect match"
+  },
+  "270526502725": {
+    "score": 0,
+    "reason": "Non-IT role focused on Salesforce, candidate is a developer"
+  },
+  "270526934755": {
+    "score": 90,
+    "reason": ".NET Full Stack Developer role, strong match with core stack"
+  },
+  "270526934796": {
+    "score": 0,
+    "reason": "Zero stack overlap, role focused on Java"
+  },
+  "270526934498": {
+    "score": 0,
+    "reason": "Zero stack overlap, role focused on Java"
+  },
+  "270526931350": {
+    "score": 50,
+    "reason": ".NET and React present, but React is not a core stack for the candidate"
+  },
+  "270526932850": {
+    "score": 0,
+    "reason": "Java and Spring Boot dominate the stack, no relevant overlap"
+  },
+  "280526926719": {
+    "score": 70,
+    "reason": "Node.js is present and some overlap with full stack development, but lacks core technologies"
+  },
+  "280526028124": {
+    "score": 90,
+    "reason": "Dot Net Fullstack Developer role with mandatory C# and AngularJS, strong match"
+  },
+  "270526503003": {
+    "score": 30,
+    "reason": "Senior Software Engineer role with no relevant tech stack, vague requirements"
+  },
+  "280526504605": {
+    "score": 30,
+    "reason": "Webiny Senior Developer role lacks core stack relevance, vague"
+  },
+  "280526503566": {
+    "score": 0,
+    "reason": "Salesforce Developer role, no overlap with candidate's skills"
+  },
+  "270526935773": {
+    "score": 0,
+    "reason": "Java-focused role, no overlap with candidate's core stack"
+  },
+  "280526504065": {
+    "score": 0,
+    "reason": "Java Developer role, no overlap with candidate's core stack"
+  },
+  "280526926280": {
+    "score": 0,
+    "reason": "Java Spring Boot Developer role, no overlap with candidate's core stack"
+  },
+  "280526504087": {
+    "score": 0,
+    "reason": "Java Fullstack Developer role, no overlap with candidate's core stack"
+  },
+  "280526504080": {
+    "score": 0,
+    "reason": "Java Developer role, no overlap with candidate's core stack"
+  },
+  "280526504060": {
+    "score": 0,
+    "reason": "Senior React Developer role, no overlap with candidate's core stack"
+  },
+  "280526504032": {
+    "score": 30,
+    "reason": "Sr. Software Engineer role lacks core stack relevance, vague"
+  },
+  "280526502882": {
+    "score": 30,
+    "reason": "Software Engineer II-2 role lacks core stack relevance, vague"
+  },
+  "280526500207": {
+    "score": 0,
+    "reason": "Software Engineer Senior role with no relevant tech stack"
+  },
+  "270526504138": {
+    "score": 0,
+    "reason": "Java Backend role, no overlap with candidate's core stack"
+  },
+  "270526503216": {
+    "score": 0,
+    "reason": "Junior Canvas App Developer role, no overlap with candidate's core stack"
+  },
+  "290526910526": {
+    "score": 0,
+    "reason": "Zero stack overlap, focused on Java."
+  },
+  "290526011056": {
+    "score": 50,
+    "reason": "Angular present but primarily Java-focused, experience slightly off"
+  },
+  "290526011362": {
+    "score": 0,
+    "reason": "Zero stack overlap, role focuses on software packaging."
+  },
+  "290526000035": {
+    "score": 100,
+    "reason": "Fullstack role with mandatory C# and Angular, perfect match"
+  },
+  "290526007044": {
+    "score": 30,
+    "reason": "React and Python present, but core stack is not aligned"
+  },
+  "270526932703": {
+    "score": 0,
+    "reason": "Role focuses on Python and emerging technologies, no relevant stack"
+  },
+  "270526935724": {
+    "score": 0,
+    "reason": "Java focused role, no relevant stack alignment"
+  },
+  "210526005822": {
+    "score": 0,
+    "reason": "MuleSoft role with no relevant stack"
+  },
+  "280526927032": {
+    "score": 0,
+    "reason": "Non-IT role, no relevant stack"
+  },
+  "290526012680": {
+    "score": 30,
+    "reason": "Familiar tech present but heavily dominated by Django and Python, not a fit"
+  },
+  "290526500048": {
+    "score": 0,
+    "reason": "No relevant tech stack, primarily focused on .NET technologies but not core stack"
+  },
+  "290526502239": {
+    "score": 30,
+    "reason": "Vague role with some overlap but lacks core stack"
+  },
+  "290526501966": {
+    "score": 30,
+    "reason": "Vague role with no core stack overlap"
+  },
+  "290526502301": {
+    "score": 30,
+    "reason": "Vague role with no relevant tech stack"
+  },
+  "290526501305": {
+    "score": 90,
+    "reason": "Strong match for .NET role with relevant skills in C# and Azure."
+  },
+  "290526500738": {
+    "score": 30,
+    "reason": "Vague role with some familiar tech but no core stack alignment"
+  },
+  "290526502076": {
+    "score": 30,
+    "reason": "Vague role with some familiar tech but primarily focused on Java"
+  },
+  "290526502138": {
+    "score": 0,
+    "reason": "Zero stack overlap, requires .NET technologies but focuses on jQuery"
+  },
+  "290526501516": {
+    "score": 0,
+    "reason": "Zero stack overlap, requires Pega and Unix"
+  },
+  "290526502885": {
+    "score": 0,
+    "reason": "Zero stack overlap, role is focused on technical writing and Python"
+  },
+  "290526014329": {
+    "score": 50,
+    "reason": "AngularJS + Springboot role, but Springboot is not preferred"
+  },
+  "290526503688": {
+    "score": 0,
+    "reason": "Salesforce development role with no overlap in required tech stack"
+  },
+  "290526914869": {
+    "score": 30,
+    "reason": "Familiar tech present but heavily dominated by Python/Java without core stack."
+  },
+  "290526914926": {
+    "score": 90,
+    "reason": "Strong match with .NET stack and experience requirements."
+  },
+  "290526915156": {
+    "score": 0,
+    "reason": "Zero stack overlap, primarily focused on mainframe."
+  },
+  "290526915188": {
+    "score": 0,
+    "reason": "Mandatory stack is BPMN, no overlap with candidate's skills."
+  },
+  "290526915012": {
+    "score": 0,
+    "reason": "Mandatory stack is Nostro and reconciliation, no overlap with candidate's skills."
+  },
+  "290526914889": {
+    "score": 30,
+    "reason": "Familiar tech present (Angular, TypeScript) but heavily focused on React and UX"
+  },
+  "290526915038": {
+    "score": 0,
+    "reason": "Mandatory Python role with no overlap in core stack."
+  },
+  "290526915662": {
+    "score": 0,
+    "reason": "Pure React Native role, candidate is a developer."
+  },
+  "290526019388": {
+    "score": 95,
+    "reason": "Fullstack role with mandatory .NET Core and optional Angular, strong match."
+  },
+  "290526504160": {
+    "score": 0,
+    "reason": "Zero stack overlap, role focused on Sailpoint and LDAP"
+  },
+  "290526506445": {
+    "score": 30,
+    "reason": "Role is focused on Java, which is not in the candidate's core stack."
+  },
+  "290526507268": {
+    "score": 30,
+    "reason": "Role is vague with a focus on C# and algorithms but requires 2-4 years of experience, which is below the candidate's experience."
+  },
+  "290526507239": {
+    "score": 0,
+    "reason": "Mandatory Python role with no overlap in core stack"
+  },
+  "290526506481": {
+    "score": 0,
+    "reason": "Mandatory Pega role with no overlap in core stack"
+  },
+  "290526916209": {
+    "score": 30,
+    "reason": "Role requires Terraform and CloudFormation, minimal overlap with core stack"
+  },
+  "150526027259": {
+    "score": 50,
+    "reason": "Node.js is present but lacks .NET or Angular, and the role is focused on Node.js."
+  },
+  "150526024650": {
+    "score": 80,
+    "reason": "Full Stack Developer role with Azure and JavaScript, aligns well with candidate's skills."
+  },
+  "290526915656": {
+    "score": 0,
+    "reason": "Pure React Native role, candidate is a developer."
+  },
+  "290526917732": {
+    "score": 0,
+    "reason": "Zero stack overlap, focused on Kubernetes and AWS management."
+  },
+  "290526917595": {
+    "score": 0,
+    "reason": "Java Full Stack Developer role focused on React/Node, no alignment with candidate's core stack."
+  },
+  "290526917738": {
+    "score": 30,
+    "reason": "Node.js is mandatory, but lacks core stack alignment."
+  },
+  "290526508545": {
+    "score": 95,
+    "reason": "Strong match with mandatory C# and optional Angular, fits well with candidate's experience."
+  },
+  "140426023842": {
+    "score": 0,
+    "reason": "Zero stack overlap, candidate is a developer"
+  },
+  "130526044878": {
+    "score": 30,
+    "reason": "Familiar tech present but heavily dominated by Python, not a strong fit."
+  },
+  "290526919642": {
+    "score": 30,
+    "reason": "Java Full Stack Developer role, but lacks core stack alignment."
+  },
+  "290526024710": {
+    "score": 95,
+    "reason": ".NET Full Stack Development role with mandatory C# and .NET Core, strong match"
+  },
+  "290526919991": {
+    "score": 90,
+    "reason": "Dot Net Developer role with mandatory .NET Core, strong match"
+  },
+  "290526024794": {
+    "score": 30,
+    "reason": "Java Full Stack role with AngularJS, but Java is not in the candidate's core stack."
+  },
+  "290526024818": {
+    "score": 0,
+    "reason": "Zero stack overlap, primarily Java-focused."
+  },
+  "290526920361": {
+    "score": 0,
+    "reason": "Zero stack overlap, role focused on business rules and pharmacy"
+  },
+  "290526921336": {
+    "score": 90,
+    "reason": "Fullstack role with .NET and Angular, strong match."
+  },
+  "290526921033": {
+    "score": 30,
+    "reason": "Role is vague with a focus on product management and architecture, lacking core stack alignment."
+  },
+  "290526024912": {
+    "score": 0,
+    "reason": "Zero stack overlap, role focused on IICS and IDMC"
+  },
+  "290526024922": {
+    "score": 30,
+    "reason": "Java is mandatory and does not align with the candidate's core stack."
+  },
+  "290526921923": {
+    "score": 30,
+    "reason": "ReactJS fullstack role with mandatory TypeScript and FastAPI, which diverges from the candidate's core stack."
+  },
+  "290526921887": {
+    "score": 90,
+    "reason": "Strong .NET developer role with AWS, matches core stack"
+  },
+  "290526505673": {
+    "score": 0,
+    "reason": "Pure QA testing role, candidate is a developer"
+  },
+  "290526505225": {
+    "score": 0,
+    "reason": "Role is focused on SharePoint development, not aligned with core stack"
+  },
+  "290526507163": {
+    "score": 0,
+    "reason": "Guidewire development role, no alignment with core stack"
+  },
+  "290526920317": {
+    "score": 0,
+    "reason": "Salesforce developer role, no alignment with core stack"
+  },
+  "290526917324": {
+    "score": 0,
+    "reason": "Salesforce developer role, no alignment with core stack"
   }
 }
