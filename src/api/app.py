@@ -126,10 +126,12 @@ async def get_companies(
     """Get all stored companies with their outreach emails."""
     companies = db.get_all_with_emails(location)
     stats = db.get_pipeline_stats(location)
+    verifications = db.get_all_email_verifications()
     return {
         "companies": companies,
         "stats": stats,
-        "total": len(companies)
+        "total": len(companies),
+        "verifications": verifications
     }
 
 
@@ -205,6 +207,44 @@ async def get_stats(
 ):
     """Get pipeline funnel stats."""
     return db.get_pipeline_stats(location)
+
+
+@app.get("/api/verify-email")
+async def verify_email(email: str = Query(..., description="Email to verify")):
+    """Verify email using Hunter.io API"""
+    existing = db.get_email_verification(email)
+    if existing:
+        return {"status": existing["status"], "score": existing["score"]}
+
+    from dotenv import load_dotenv
+    load_dotenv()
+    
+    api_key = os.environ.get("HUNTER_API_KEY")
+    if not api_key:
+        raise HTTPException(status_code=500, detail="HUNTER_API_KEY not configured in .env")
+    
+    url = f"https://api.hunter.io/v2/email-verifier?email={email}&api_key={api_key}"
+    try:
+        import requests
+        response = requests.get(url)
+        data = response.json()
+        
+        status = "unknown"
+        score = 0
+        
+        if "data" in data and "status" in data["data"]:
+            status = data["data"]["status"]
+            score = data["data"].get("score", 0)
+        elif "data" in data and "result" in data["data"]: # sometimes it's result
+            status = data["data"]["result"]
+            score = data["data"].get("score", 0)
+        else:
+            return {"status": "unknown", "error": data.get("errors", "Unknown error")}
+            
+        db.save_email_verification(email, status, score)
+        return {"status": status, "score": score}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/api/locations")

@@ -53,6 +53,7 @@ export interface CompaniesResponse {
   companies: Company[];
   stats: PipelineStats;
   total: number;
+  verifications: { [email: string]: { status: string, score: number } };
 }
 
 @Injectable({
@@ -111,5 +112,10 @@ export class ApiService {
 
   getLocations(): Observable<{ locations: string[] }> {
     return this.http.get<{ locations: string[] }>(`${this.baseUrl}/locations`);
+  }
+
+  verifyEmail(email: string): Observable<{ status: string, score: number, error?: string }> {
+    const params = new HttpParams().set('email', email);
+    return this.http.get<{ status: string, score: number, error?: string }>(`${this.baseUrl}/verify-email`, { params });
   }
 }

@@ -22,6 +22,7 @@ export class Dashboard implements OnInit, OnDestroy {
   companies: Company[] = [];
   stats: PipelineStats = { discovered: 0, website_found: 0, email_found: 0, drafted: 0, sent: 0 };
   savedLocations: string[] = [];
+  verifications: { [email: string]: { status: string, score: number } } = {};
 
   // UI state
   activeFilter = 'all';
@@ -42,6 +43,7 @@ export class Dashboard implements OnInit, OnDestroy {
       next: (res) => {
         this.companies = res.companies;
         this.stats = res.stats;
+        this.verifications = res.verifications || {};
         this.isLoaded = true;
         this.cdr.detectChanges();
       },
@@ -83,6 +85,7 @@ export class Dashboard implements OnInit, OnDestroy {
           next: (dbRes) => {
             this.companies = dbRes.companies;
             this.stats = dbRes.stats;
+            this.verifications = dbRes.verifications || {};
             this.currentPage = 1; // reset pagination
           }
         });
@@ -100,6 +103,7 @@ export class Dashboard implements OnInit, OnDestroy {
               next: (latest) => {
                 this.companies = latest.companies;
                 this.stats = latest.stats;
+                this.verifications = latest.verifications || {};
                 this.cdr.detectChanges();
               }
             });
@@ -119,6 +123,7 @@ export class Dashboard implements OnInit, OnDestroy {
       next: (res) => {
         this.companies = res.companies;
         this.stats = res.stats;
+        this.verifications = res.verifications || {};
         this.currentPage = 1;
         this.cdr.detectChanges();
       }

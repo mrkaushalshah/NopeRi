@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectorRef, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Company, ApiService } from '../services/api';
 
@@ -8,8 +8,9 @@ import { Company, ApiService } from '../services/api';
   templateUrl: './company-card.html',
   styleUrl: './company-card.css',
 })
-export class CompanyCard {
+export class CompanyCard implements OnInit, OnChanges {
   @Input() company!: Company;
+  @Input() globalVerifications: { [email: string]: { status: string, score: number } } = {};
   @Output() statusChanged = new EventEmitter<void>();
   @Output() deleted = new EventEmitter<string>();
 
@@ -17,7 +18,26 @@ export class CompanyCard {
   isUpdating = false;
   isDeleting = false;
 
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService, private cdr: ChangeDetectorRef) {}
+
+  ngOnInit() {
+    this.syncVerifications();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['globalVerifications']) {
+      this.syncVerifications();
+    }
+  }
+
+  syncVerifications() {
+    for (const email of this.emails) {
+      if (this.globalVerifications && this.globalVerifications[email]) {
+        this.emailVerificationStatus[email] = this.globalVerifications[email].status;
+        this.emailVerificationScore[email] = this.globalVerifications[email].score;
+      }
+    }
+  }
 
   markAsSent() {
     this.isUpdating = true;
@@ -26,9 +46,11 @@ export class CompanyCard {
         this.company.status = 'sent_manually';
         this.isUpdating = false;
         this.statusChanged.emit();
+        this.cdr.detectChanges();
       },
       error: () => {
         this.isUpdating = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -40,12 +62,43 @@ export class CompanyCard {
         next: () => {
           this.isDeleting = false;
           this.deleted.emit(this.company.id);
+          this.cdr.detectChanges();
         },
         error: () => {
           this.isDeleting = false;
+          this.cdr.detectChanges();
         }
       });
     }
+  }
+
+  emailVerificationStatus: { [email: string]: string } = {};
+  emailVerificationScore: { [email: string]: number } = {};
+
+  verifyEmail(email: string, event: Event) {
+    event.stopPropagation();
+    if (this.emailVerificationStatus[email] === 'verifying') return;
+    
+    this.emailVerificationStatus[email] = 'verifying';
+    this.cdr.detectChanges();
+
+    this.api.verifyEmail(email).subscribe({
+      next: (res) => {
+        this.emailVerificationStatus[email] = res.status;
+        this.emailVerificationScore[email] = res.score || 0;
+        
+        // Also update the global state so it persists if component is recreated
+        if (this.globalVerifications) {
+            this.globalVerifications[email] = { status: res.status, score: res.score || 0 };
+        }
+        
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.emailVerificationStatus[email] = 'unknown';
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   get emails(): string[] {

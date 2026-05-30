@@ -120,6 +120,15 @@ class OutreachDB:
         )
         """)
 
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS email_verifications (
+            email TEXT PRIMARY KEY,
+            status TEXT,
+            score INTEGER,
+            verified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        """)
+
         conn.commit()
         conn.close()
 
@@ -176,6 +185,39 @@ class OutreachDB:
             ))
             conn.commit()
             return email_id
+        finally:
+            conn.close()
+
+    def save_email_verification(self, email, status, score):
+        conn = self._connect()
+        cursor = conn.cursor()
+        try:
+            cursor.execute("""
+                INSERT OR REPLACE INTO email_verifications
+                (email, status, score, verified_at)
+                VALUES (?, ?, ?, ?)
+            """, (email, status, score, datetime.now().isoformat()))
+            conn.commit()
+        finally:
+            conn.close()
+
+    def get_email_verification(self, email):
+        conn = self._connect()
+        cursor = conn.cursor()
+        try:
+            cursor.execute("SELECT * FROM email_verifications WHERE email = ?", (email,))
+            row = cursor.fetchone()
+            return dict(row) if row else None
+        finally:
+            conn.close()
+
+    def get_all_email_verifications(self):
+        conn = self._connect()
+        cursor = conn.cursor()
+        try:
+            cursor.execute("SELECT * FROM email_verifications")
+            rows = cursor.fetchall()
+            return {row["email"]: {"status": row["status"], "score": row["score"]} for row in rows}
         finally:
             conn.close()
 

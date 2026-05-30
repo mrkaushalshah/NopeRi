@@ -32,14 +32,47 @@
 <!-- Emails -->
 <td class="px-4 py-4 align-top">
   @if (emails.length > 0) {
-    <div class="flex flex-col gap-1.5 max-w-[150px]">
+    <div class="flex flex-col gap-1.5 w-[200px]">
       @for (email of emails; track email) {
-        <button (click)="copyToClipboard(email, 'email-' + email)"
-                class="copy-btn text-[10px] font-mono justify-start text-left truncate"
-                [class.copied]="copiedField === 'email-' + email"
-                [title]="email">
-          {{ copiedField === 'email-' + email ? '✓ Copied' : email }}
-        </button>
+        <div class="flex items-center gap-1.5 w-full">
+          <!-- Hunter Verify Button -->
+          <div class="flex items-center bg-white/[0.03] border border-white/[0.06] rounded hover:bg-white/[0.08] transition-colors shrink-0">
+            <button (click)="verifyEmail(email, $event)" 
+                    class="flex items-center justify-center w-6 h-6 cursor-pointer"
+                    [title]="emailVerificationStatus[email] ? 'Status: ' + emailVerificationStatus[email] : 'Verify ' + email + ' via Hunter.io'">
+              
+              @if (!emailVerificationStatus[email]) {
+                <span class="text-[10px] opacity-70">🎯</span>
+              } @else if (emailVerificationStatus[email] === 'verifying') {
+                <span class="animate-spin text-[10px]">🔄</span>
+              } @else if (emailVerificationStatus[email] === 'valid' || emailVerificationStatus[email] === 'deliverable') {
+                <span class="text-emerald-400 text-[10px] font-bold">✓</span>
+              } @else if (emailVerificationStatus[email] === 'invalid' || emailVerificationStatus[email] === 'undeliverable') {
+                <span class="text-red-400 text-[10px] font-bold">✗</span>
+              } @else if (emailVerificationStatus[email] === 'accept_all' || emailVerificationStatus[email] === 'risky' || emailVerificationStatus[email] === 'webmail' || emailVerificationStatus[email] === 'disposable') {
+                <span class="text-yellow-400 text-[10px] font-bold">⚠️</span>
+              } @else {
+                <span class="text-stone-400 text-[10px] font-bold">?</span>
+              }
+            </button>
+            @if (emailVerificationScore[email]) {
+              <span class="text-[9px] font-mono pr-1.5 font-bold" 
+                    [class.text-emerald-400]="emailVerificationScore[email] >= 80"
+                    [class.text-yellow-400]="emailVerificationScore[email] >= 50 && emailVerificationScore[email] < 80"
+                    [class.text-red-400]="emailVerificationScore[email] < 50"
+                    title="Hunter Confidence Score">
+                {{ emailVerificationScore[email] }}
+              </span>
+            }
+          </div>
+          
+          <button (click)="copyToClipboard(email, 'email-' + email)"
+                  class="copy-btn text-[10px] font-mono justify-start text-left truncate flex-1"
+                  [class.copied]="copiedField === 'email-' + email"
+                  [title]="email">
+            {{ copiedField === 'email-' + email ? '✓ Copied' : email }}
+          </button>
+        </div>
       }
     </div>
   } @else {

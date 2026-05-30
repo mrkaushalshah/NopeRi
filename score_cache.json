@@ -1814,5 +1814,9 @@
   "290526917324": {
     "score": 0,
     "reason": "Salesforce developer role, no alignment with core stack"
+  },
+  "300526008782": {
+    "score": 0,
+    "reason": "Zero stack overlap, Java only"
   }
 }
