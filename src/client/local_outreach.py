@@ -2,6 +2,7 @@ import os
 import re
 import json
 import uuid
+import asyncio
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
@@ -151,83 +152,98 @@ class LocalOutreachClient:
     # ─── EMAIL SCRAPING ─────────────────────────────────────────
     def extract_website_emails(self, url: str) -> list[str]:
         """
-        Scrape a company website for email addresses.
+        Scrape a company website for email addresses using a lightweight synchronous BFS.
         Strategy:
           1. Scrape homepage for emails.
-          2. If none found, try common career/contact page paths.
-          3. Also follow any links that look career/contact related.
+          2. If none found, discover and enqueue links that look like career/contact pages.
         Returns a deduplicated list of valid emails.
         """
         if not url:
             return []
 
-        # Normalize URL
         if not url.startswith("http"):
             url = "https://" + url
 
         all_emails = set()
+        visited = set()
+        queue = [url]
+        max_pages = 8
 
-        # Step 1: Scrape homepage
-        homepage_emails = self._scrape_page_for_emails(url)
-        all_emails.update(homepage_emails)
-
-        # Step 2: Try common career/contact paths
-        if len(all_emails) < 3:
-            base = f"{urlparse(url).scheme}://{urlparse(url).netloc}"
-            for path in self.CAREER_PATHS:
-                page_url = base + path
-                try:
-                    emails = self._scrape_page_for_emails(page_url, timeout=5)
-                    all_emails.update(emails)
-                except Exception:
-                    continue
-
-        # Step 3: Follow links from homepage that look like career/contact pages
-        if len(all_emails) < 3:
+        while queue and len(visited) < max_pages:
+            current_url = queue.pop(0)
+            if current_url in visited:
+                continue
+                
+            visited.add(current_url)
+            
             try:
-                resp = self.session.get(url, timeout=8)
-                if resp.ok:
-                    soup = BeautifulSoup(resp.text, "html.parser")
-                    for link in soup.find_all("a", href=True):
-                        href = link.get("href", "").lower()
-                        text = link.get_text(strip=True).lower()
-                        if any(kw in href or kw in text for kw in ["career", "contact", "job", "hire", "join"]):
-                            full_url = urljoin(url, link["href"])
-                            if urlparse(full_url).netloc == urlparse(url).netloc:
-                                emails = self._scrape_page_for_emails(full_url, timeout=5)
-                                all_emails.update(emails)
-            except Exception:
-                pass
+                res = self.session.get(current_url, timeout=10)
+                if not res.ok:
+                    continue
+            except requests.RequestException:
+                continue
 
-        # Filter noise
-        clean = [e for e in all_emails if not self._is_noise_email(e)]
-        return sorted(set(clean))
-
-    def _scrape_page_for_emails(self, url: str, timeout: int = 8) -> set:
-        """Fetch a single page and extract emails from it."""
-        try:
-            resp = self.session.get(url, timeout=timeout, allow_redirects=True)
-            if not resp.ok:
-                return set()
-
-            emails = set()
-
-            # From mailto: links
-            soup = BeautifulSoup(resp.text, "html.parser")
+            soup = BeautifulSoup(res.text, "html.parser")
+            
+            # 1. Extract from mailto: links
             for mailto in soup.select('a[href^="mailto:"]'):
                 email = mailto["href"].replace("mailto:", "").split("?")[0].strip()
                 if self.EMAIL_REGEX.match(email):
-                    emails.add(email.lower())
+                    all_emails.add(email.lower())
 
-            # From raw text via regex
-            text_emails = self.EMAIL_REGEX.findall(resp.text)
+            # 2. Extract and decode Cloudflare-obfuscated emails (data attributes and protection links)
+            for tag in soup.select('[data-cfemail]'):
+                hex_str = tag.get("data-cfemail", "")
+                decoded = self._decode_cloudflare_email(hex_str)
+                if decoded and self.EMAIL_REGEX.match(decoded):
+                    all_emails.add(decoded.lower())
+
+            for link in soup.select('a[href*="/cdn-cgi/l/email-protection"]'):
+                href = link.get("href", "")
+                parts = href.split("#")
+                if len(parts) > 1:
+                    hex_str = parts[1]
+                    decoded = self._decode_cloudflare_email(hex_str)
+                    if decoded and self.EMAIL_REGEX.match(decoded):
+                        all_emails.add(decoded.lower())
+
+            # 3. Extract from raw text
+            text_emails = self.EMAIL_REGEX.findall(res.text)
             for email in text_emails:
-                emails.add(email.lower())
+                all_emails.add(email.lower())
+                
+            # If we don't have enough emails and we are on the homepage, enqueue deeper pages
+            is_homepage = current_url.rstrip("/") == url.rstrip("/")
+            if len(all_emails) < 3 and is_homepage:
+                urls_to_add = []
+                
+                # 1. Standard blind guesses (High priority, append first)
+                for path in self.CAREER_PATHS:
+                    urls_to_add.append(urljoin(url, path))
 
-            return emails
-
-        except requests.RequestException:
-            return set()
+                # 2. Dynamic discovery from homepage links (Lower priority)
+                for link in soup.find_all("a", href=True):
+                    href = link.get("href", "").lower()
+                    text = link.get_text(strip=True).lower()
+                    
+                    # Skip noise paths that look like agency "hire developers" packages
+                    if "service" in href or "packages" in href:
+                        continue
+                        
+                    if any(kw in href or kw in text for kw in ["career", "contact", "job", "hiring", "join", "about", "team"]):
+                        full_url = urljoin(current_url, link["href"])
+                        if urlparse(full_url).netloc == urlparse(url).netloc:
+                            urls_to_add.append(full_url)
+                            
+                # Preserve order while deduplicating to avoid randomized set shuffling
+                seen_to_add = set()
+                for u in urls_to_add:
+                    if u not in visited and u not in queue and u not in seen_to_add:
+                        seen_to_add.add(u)
+                        queue.append(u)
+                        
+        clean = [e for e in all_emails if not self._is_noise_email(e)]
+        return sorted(set(clean))
 
     def _is_noise_email(self, email: str) -> bool:
         """Filter out image filenames, placeholder emails, etc."""
@@ -235,6 +251,18 @@ class LocalOutreachClient:
             if re.match(pattern, email, re.IGNORECASE):
                 return True
         return False
+
+    def _decode_cloudflare_email(self, hex_str: str) -> str:
+        """Decode a Cloudflare email protection hex string."""
+        try:
+            key = int(hex_str[:2], 16)
+            email = ""
+            for i in range(2, len(hex_str), 2):
+                char_val = int(hex_str[i:i+2], 16) ^ key
+                email += chr(char_val)
+            return email
+        except Exception:
+            return ""
 
     # ─── AI ENRICHMENT ──────────────────────────────────────────
     def enrich_company_data(self, company: dict, emails: list[str]) -> dict:
@@ -333,7 +361,7 @@ Return JSON:
 
         profile_summary = json.dumps(profile, indent=2) if profile else "No profile available"
 
-        prompt = f"""Draft a cold outreach email to a company's HR/careers team for job opportunities on behalf of Kaushal Shah.
+        prompt = f"""Draft a highly personalized, premium, and compelling cold outreach email to a company's HR/careers team for job opportunities on behalf of Kaushal Shah.
 
 Company Info:
 - Name: {company.get('name')}
@@ -345,14 +373,23 @@ Candidate Profile:
 {profile_summary}
 
 Rules:
-- Subject: MUST be exactly "Job Application - [Custom Designation Name] - Kaushal Shah". (Determine the best matching designation based on candidate's skills and company type, e.g. "Full-Stack Developer (Angular & .NET)").
-- Body: Keep it concise and punchy (3-4 paragraphs max). Introduce Kaushal Shah and focus on the unique value he brings to the table and how he can be a valuable asset to their specific team.
-- Important Rules:
-  1. DO NOT mention Current CTC or Expected CTC.
-  2. DO NOT state a preference for remote/hybrid. Explicitly state he is based in Pune and open to in-office roles.
-  3. Format his skills properly, using comma seperated under the respective categories (e.g. Frontend, Backend, AI/Tools).
-  4. DO NOT include placeholders like [Your Contact Information] — only use "Kaushal Shah".
-  5. Ensure you explicitly mention that his resume is attached to the email.
+- Subject: MUST be exactly "Senior Full-Stack Engineer - Kaushal Shah (Angular 18+ / .NET Core / AI Automation)".
+- Body Structure and Tone:
+  1. Opening: Start with a professional introduction. Acknowledge {company.get('name')} and state interest in joining as a Senior Full-Stack Developer. Highlight 4.5+ years of experience building robust, scalable applications in secure, complex domains (LegalTech, FinTech, and SaaS).
+  2. Value Hook: Incorporate a strong value statement highlighting his "dual-threat" capability: the architectural rigor of a backend engineer coupled with the user-centric design precision of a modern frontend developer.
+  3. Skill Highlights Section: You MUST include a section titled exactly "My Core Stack & Expertise:" formatted as a clean, bulleted list. DO NOT use asterisks or any other markdown formatting. Format as follows:
+     - Frontend Stack: Angular 18+, Vue.js, TypeScript (focused on modern reactive systems, state management, and high-performance UIs)
+     - Backend Stack: .NET Core, C#, Node.js (expert in RESTful APIs, scalable database architectures, and microservices)
+     - AI & Automation Edge: Hands-on integration of the OpenAI API and custom workflow automation engines to drive modern features and increase operational efficiency
+     - Engineering Delivery: Proven history of leading module development, establishing clean-code standards, and mentoring junior engineers to elevate overall shipping velocity
+  4. Closing: Explicitly state that he is based in Pune and fully open to working in-office. Explicitly mention that his resume is attached.
+- Important Restrictions:
+  1. STRICTLY FORBIDDEN: DO NOT start the email with generic greetings like "I hope this message finds you well", "I hope this email finds you well", or similar opening fluff. Begin directly with the professional introduction after the initial salutation (e.g. "Dear [Company] HR Team," followed by "My name is Kaushal Shah...").
+  2. STRICTLY FORBIDDEN: DO NOT use markdown bolding (double asterisks like **Word** or similar) anywhere in the email body or headers. Use standard capitalization or plain text labeling (e.g. "My Core Stack & Expertise:" and "Frontend Stack:").
+  3. DO NOT mention Current CTC or Expected CTC under any circumstances.
+  4. DO NOT state a preference for remote/hybrid. Explicitly state he is open to in-office roles in Pune.
+  5. DO NOT include any placeholders like [Your Contact Information], [Phone Number], or [LinkedIn Link].
+  6. There should be no email signature at the very end of the email.
 
 Return JSON:
 {{

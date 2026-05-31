@@ -17,7 +17,7 @@
 
 ### Backend (Python)
 - **Google Places API:** Use `requests` to call Google Maps Nearby Search API. Need to configure API keys.
-- **Web Crawling:** `requests` + `BeautifulSoup4` for parsing HTML to find `mailto:` links or regex matching emails.
+- **Web Crawling:** `crawlee` (`crawlee-python`) to handle concurrency, parsing, and anti-bot measures. The crawler will target `mailto:` links and use regex to match emails on contact/career pages.
 - **SQLite:** Standard Python `sqlite3` module. Need schema for `companies` and `outreach_pipelines`.
 - **OpenAI:** Re-use the existing `AIHandler` from `src/utils/ai_handler.py`.
 - **API Framework:** `FastAPI` to expose the backend to the Angular frontend.

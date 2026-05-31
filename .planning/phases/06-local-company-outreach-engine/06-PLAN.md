@@ -49,10 +49,11 @@ Run `init_db()` upon instantiation.
 Create `src/client/local_outreach.py`.
 Implement a `LocalOutreachClient` class:
 1. `search_companies(location: str, radius: int)`: Calls Google Places Nearby Search API with keyword "IT software company".
-2. `extract_website_emails(url: str)`: Uses `requests` and `BeautifulSoup` to fetch the homepage. Looks for `mailto:` links or regex matches for emails (`[\w\.-]+@[\w\.-]+`). Checks up to 1 level deep for `/contact`, `/careers`, or `/jobs` if emails aren't found on the homepage.
+2. `extract_website_emails(url: str)`: Use Crawlee for Python (`crawlee-python`). Set up an `HttpCrawler` or `PlaywrightCrawler` (if JS rendering is needed) to fetch the homepage. Look for `mailto:` links or regex matches for emails (`[\w\.-]+@[\w\.-]+`). The crawler should follow links up to 1 level deep for `/contact`, `/careers`, or `/jobs` if emails aren't found on the homepage. Use Crawlee's RequestQueue to manage the crawling gracefully without getting blocked.
 </action>
 <acceptance_criteria>
 - `src/client/local_outreach.py` contains `LocalOutreachClient` with `search_companies` and `extract_website_emails` methods.
+- Method `extract_website_emails` imports and utilizes `crawlee`.
 - Method `extract_website_emails` uses regex `[\w\.-]+@[\w\.-]+` to find emails.
 </acceptance_criteria>
 

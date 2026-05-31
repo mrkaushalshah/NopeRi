@@ -1818,5 +1818,77 @@
   "300526008782": {
     "score": 0,
     "reason": "Zero stack overlap, Java only"
+  },
+  "290526025675": {
+    "score": 30,
+    "reason": "Familiar tech present but heavily dominated by Python and React, not a strong fit"
+  },
+  "290526508538": {
+    "score": 30,
+    "reason": "Role is focused on cybersecurity with a mix of technologies, but lacks core stack relevance."
+  },
+  "280526928141": {
+    "score": 0,
+    "reason": "Role is focused on AS400 development and DevOps, which is not relevant to the candidate's skills."
+  },
+  "290526024155": {
+    "score": 90,
+    "reason": ".NET Engineer role with SQL, matches candidate's .NET experience."
+  },
+  "300526011564": {
+    "score": 0,
+    "reason": "Zero stack overlap, candidate specializes in Angular/.NET"
+  },
+  "200226000075": {
+    "score": 0,
+    "reason": "Pure React role, candidate is a developer."
+  },
+  "290526920571": {
+    "score": 0,
+    "reason": "Pure Java role, candidate's core stack is not aligned."
+  },
+  "300526011723": {
+    "score": 0,
+    "reason": "Pure Pega role, candidate's core stack is not aligned."
+  },
+  "300526009467": {
+    "score": 0,
+    "reason": "Pure Dell Boomi role, candidate's core stack is not aligned."
+  },
+  "290526918276": {
+    "score": 90,
+    "reason": ".NET Core role is a perfect match for the candidate's backend skills."
+  },
+  "290526918237": {
+    "score": 30,
+    "reason": "UI React developer role, lacks core stack alignment with candidate's experience."
+  },
+  "290526921524": {
+    "score": 0,
+    "reason": "Zero stack overlap, role focused on site reliability engineering"
+  },
+  "290526019669": {
+    "score": 0,
+    "reason": "Zero stack overlap, role focused on Duck Creek policy development"
+  },
+  "290526920477": {
+    "score": 0,
+    "reason": "Cloud Engineer role is focused on Azure and DevOps, no overlap with candidate's development skills."
+  },
+  "290526915120": {
+    "score": 0,
+    "reason": "Release Engineer role is focused on DevOps and infrastructure, no overlap with candidate's development skills."
+  },
+  "290526505819": {
+    "score": 0,
+    "reason": "Role requires Java, which is outside the candidate's core stack."
+  },
+  "290526505103": {
+    "score": 95,
+    "reason": "Senior .NET Core role, perfect match for candidate's backend skills."
+  },
+  "290526504197": {
+    "score": 30,
+    "reason": "Java dominant stack with no relevant technologies, weak fit"
   }
 }

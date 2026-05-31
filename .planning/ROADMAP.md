@@ -30,9 +30,12 @@
   - Ensure correct sorting logic to retrieve the newest jobs first.
   - Verification: Search loop processes multiple pages across different queries effectively.
 
+- [ ] **Phase 7: Naukri Scraping Modernization**
+  - Replace Selenium-based nkparam extraction with Crawlee (PlaywrightCrawler).
+  - Implement automated session management, retries, and browser fingerprinting to resist anti-bot systems.
+  - Verification: `NaukriLoginClient` authenticates correctly without Selenium, and `main.py` searches/applies successfully under WAF pressure.
+
 ## Next Milestones
-- Milestone 2: UI Dashboard (Optional)
-- Milestone 3: Advanced Behavioral Analysis
 
 ## Phase Details
 
@@ -69,3 +72,9 @@
 - Generate Company Intelligence Card and Company Fit Score using GPT-4o-mini/GPT-4o.
 - Generate custom outreach subject and body. Save to SQLite database with pipeline status tracking.
 - Display in the UI for manual review, with "Copy to Clipboard" buttons for the email subject and body. No auto-email functionality.
+
+### Phase 7: Naukri Scraping Modernization
+- Complete overhaul of `NaukriLoginClient` and `NaukriJobClient` to use `PlaywrightCrawler` from Crawlee.
+- Completely remove Selenium, geckodriver, and `get_Nkparam.py`.
+- Introduce Crawlee `SessionPool` to manage IP/Token rotation and WAF challenges automatically.
+- Verification: `NaukriLoginClient` authenticates correctly without Selenium, and `main.py` searches/applies successfully under WAF pressure.
