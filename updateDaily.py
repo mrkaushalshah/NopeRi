@@ -213,6 +213,15 @@ def continuous_runner():
     while True:
         try:
             result = update_headline(client, profile_id, token)
+            if not result.get("success") and ("401" in result.get("error", "") or "Unauthorized" in result.get("error", "")):
+                print("Session expired or token invalid (401). Re-authenticating...")
+                client = NaukriLoginClient(username, password)
+                client.login()
+                token = client.get_bearer_token()
+                profile_id = client.fetch_profile_id()
+                # Retry the headline update with fresh credentials
+                result = update_headline(client, profile_id, token)
+
             if result.get("success"):
                 print(f"SUCCESS: {result['message']} at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
             else:
