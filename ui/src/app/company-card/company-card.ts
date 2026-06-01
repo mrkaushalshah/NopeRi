@@ -197,13 +197,9 @@ export class CompanyCard implements OnInit, OnChanges {
 
   openInZohoMail() {
     if (!this.emails.length) return;
-    const to = this.emails[0];
-    const subject = encodeURIComponent(this.emailSubject);
-    const body = encodeURIComponent(this.emailBody);
     
-    // mailto: opens the default email client (which can be Zoho Mail if configured).
-    // It's the most reliable way to preserve body formatting and line breaks.
-    const mailtoUrl = `mailto:${to}?subject=${subject}&body=${body}`;
-    window.open(mailtoUrl, '_blank');
+    // Open Zoho Mail with a hash identifying the company for our assistant script
+    const zohoUrl = `https://mail.zoho.com/zm/#noperi-company-id=${this.company.id}`;
+    window.open(zohoUrl, '_blank');
   }
 }

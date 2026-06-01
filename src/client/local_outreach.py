@@ -46,7 +46,7 @@ class LocalOutreachClient:
         r'.*@(example\.com|test\.com|sentry\.io|wixpress\.com)',
     ]
 
-    def __init__(self, api_key=None, ai_handler=None):
+    def __init__(self, api_key=None, ai_handler=None, db=None):
         self.api_key = api_key or os.getenv("GOOGLE_MAPS_API_KEY")
         if not self.api_key:
             raise ValueError("GOOGLE_MAPS_API_KEY not found. Set it in .env or pass it directly.")
@@ -55,6 +55,17 @@ class LocalOutreachClient:
         self.session.headers.update({
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
         })
+        
+        # Initialize Database connection for duplicate checking
+        if db:
+            self.db = db
+        else:
+            try:
+                from src.utils.dbhandler import OutreachDB
+                self.db = OutreachDB()
+            except ImportError:
+                self.db = None
+                print("  [LocalOutreachClient] Warning: OutreachDB import failed. Duplicate checks will be disabled.")
 
     # ─── GEOCODE ────────────────────────────────────────────────
     def geocode_location(self, location_str: str) -> dict:
@@ -373,7 +384,17 @@ Candidate Profile:
 {profile_summary}
 
 Rules:
-- Subject: MUST be exactly "Senior Full-Stack Engineer - Kaushal Shah (Angular 18+ / .NET Core / AI Automation)".
+- Subject Line:
+  1. Generate a dynamic, highly professional, and personalized subject line. DO NOT use the same exact subject line for every email.
+  2. The subject line must be tailored specifically to the company, indicating an interest or exploration of senior opportunities (e.g., Senior Full-Stack Engineer, Senior Angular Developer, or Senior Software Engineer depending on what fits the company profile best).
+  3. It must include the candidate name "Kaushal Shah" and reference key technologies like Angular 18+, C#, or .NET Core.
+  4. Naturally vary the layout and phrasing. For example, draw inspiration from and vary between layouts like:
+     - Senior Full-Stack Engineer (Angular & .NET) - Kaushal Shah
+     - Full-Stack Developer | Angular 18+ & .NET Core | Kaushal Shah
+     - Senior Full-Stack Developer - {company.get('name')} - Kaushal Shah
+     - Senior Software Engineer (Angular/C#) - Kaushal Shah
+     - Full-Stack Engineer - Kaushal Shah (Angular 18+ / .NET)
+  5. STRICTLY FORBIDDEN: DO NOT use markdown bolding (asterisks) in the subject line. Keep it clean plain-text.
 - Body Structure and Tone:
   1. Opening: Start with a professional introduction. Acknowledge {company.get('name')} and state interest in joining as a Senior Full-Stack Developer. Highlight 4.5+ years of experience building robust, scalable applications in secure, complex domains (LegalTech, FinTech, and SaaS).
   2. Value Hook: Incorporate a strong value statement highlighting his "dual-threat" capability: the architectural rigor of a backend engineer coupled with the user-centric design precision of a modern frontend developer.
@@ -427,7 +448,25 @@ Return JSON:
             print("  No companies found.")
             return
 
-        print(f"  Found {len(companies)} total companies. Processing in batches of {batch_size}...")
+        # Filter out duplicates that already exist in the database to prevent duplicate scraping
+        if hasattr(self, "db") and self.db:
+            filtered_companies = []
+            duplicate_count = 0
+            for company in companies:
+                pid = company.get("google_place_id")
+                if pid and self.db.company_exists_by_place_id(pid):
+                    duplicate_count += 1
+                else:
+                    filtered_companies.append(company)
+            if duplicate_count > 0:
+                print(f"  [DUPLICATE FILTER] Skipped {duplicate_count} companies that are already in the database.")
+            companies = filtered_companies
+
+        if not companies:
+            print("  All discovered companies are already in the database. Nothing to scrape.")
+            return
+
+        print(f"  Found {len(companies)} new companies. Processing in batches of {batch_size}...")
 
         for i in range(0, len(companies), batch_size):
             batch = companies[i:i+batch_size]

@@ -19,10 +19,10 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS — allow Angular dev server
+# CORS — allow Angular dev server & Tampermonkey Zoho extension
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:4200", "http://127.0.0.1:4200"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -258,3 +258,45 @@ async def get_locations():
         return {"locations": [dict(row)["search_location"] for row in rows]}
     finally:
         db_conn.close()
+
+
+@app.get("/api/outreach/pending")
+async def get_pending_outreach():
+    """Get all unsent outreach email drafts."""
+    db_conn = db._connect()
+    try:
+        cursor = db_conn.cursor()
+        cursor.execute("""
+            SELECT c.id as company_id, c.name as company_name, c.website,
+                   e.id as email_id, e.extracted_emails, e.email_subject, e.email_body, e.sent_status
+            FROM companies c
+            JOIN outreach_emails e ON c.id = e.company_id
+            WHERE e.sent_status = 'drafted'
+            ORDER BY c.created_at ASC
+        """)
+        rows = cursor.fetchall()
+        
+        pending = []
+        for row in rows:
+            r = dict(row)
+            try:
+                r["extracted_emails"] = json.loads(r["extracted_emails"])
+            except:
+                r["extracted_emails"] = []
+            pending.append(r)
+            
+        return pending
+    finally:
+        db_conn.close()
+
+
+from fastapi.responses import FileResponse
+
+@app.get("/api/userscript/zoho-assistant.user.js")
+async def get_zoho_userscript():
+    """Serve the Tampermonkey Userscript file directly for instant installation."""
+    script_path = os.path.join(os.path.dirname(__file__), "..", "..", "scratch", "zoho_outreach_assistant.user.js")
+    if os.path.exists(script_path):
+        return FileResponse(script_path, media_type="application/javascript", filename="zoho_outreach_assistant.user.js")
+    raise HTTPException(status_code=404, detail="Userscript file not found")
+

@@ -299,6 +299,19 @@ class OutreachDB:
         finally:
             conn.close()
 
+    def company_exists_by_place_id(self, place_id):
+        if not place_id:
+            return False
+        conn = self._connect()
+        cursor = conn.cursor()
+        try:
+            cursor.execute("SELECT id FROM companies WHERE google_place_id = ?", (place_id,))
+            row = cursor.fetchone()
+            return row is not None
+        finally:
+            conn.close()
+
+
     def update_email_status(self, email_id, sent_status):
         conn = self._connect()
         cursor = conn.cursor()

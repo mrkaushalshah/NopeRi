@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "NopeRi Zoho Mail Assistant",
+  "version": "1.1",
+  "description": "Automates cold email drafting and tracking inside Zoho Mail for NopeRi",
+  "permissions": [
+    "activeTab"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://mail.zoho.com/*",
+        "https://mail.zoho.in/*",
+        "https://mail.zoho.eu/*",
+        "https://mail.zoho.com.cn/*"
+      ],
+      "js": [
+        "content.js"
+      ]
+    }
+  ],
+  "host_permissions": [
+    "http://localhost:8000/*"
+  ]
+}
