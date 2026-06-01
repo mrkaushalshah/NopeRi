@@ -334,9 +334,9 @@ Return JSON:
                 company["fit_reasoning"] = "AI parse error"
                 company["is_software_company"] = True  # Err on the side of inclusion
 
-        # Step 2: Generate outreach email (only for fit companies with emails)
+        # Step 2: Generate outreach email (only for fit companies, even if no emails found)
         email_data = None
-        if emails and company.get("fit_score", 0) >= 40:
+        if company.get("fit_score", 0) >= 40:
             email_data = self._generate_outreach_email(company, emails, profile)
 
         # Update status
