@@ -50,30 +50,101 @@ active_searches = set()
 def background_pipeline(client: LocalOutreachClient, location: str, radius: int, db: OutreachDB, mode: str):
     active_searches.add(location)
     try:
-        for batch in client.run_pipeline_batched(location, radius, batch_size=1, mode=mode):
-            for company in batch:
-                company["search_location"] = location
-                company["search_radius"] = radius
-                company_id = db.save_company(company)
+        print(f"\n[1/4] Discovering companies concurrently near '{location}'...")
+        companies = client.search_companies(location, radius)
+        if not companies:
+            print("  No companies discovered.")
+            return
+
+        # Filter out duplicates that already exist in the database to prevent duplicate scraping
+        filtered_companies = []
+        duplicate_count = 0
+        for company in companies:
+            pid = company.get("google_place_id")
+            if pid and db.company_exists_by_place_id(pid):
+                duplicate_count += 1
+            else:
+                filtered_companies.append(company)
+        
+        if duplicate_count > 0:
+            print(f"  [DUPLICATE FILTER] Skipped {duplicate_count} companies that are already in the database.")
+
+        if not filtered_companies:
+            print("  All discovered companies are already in the database. Nothing to scrape.")
+            return
+
+        # If in development mode, limit to 2 companies for fast test iterations
+        if mode == "development":
+            filtered_companies = filtered_companies[:2]
+            print(f"  [DEVELOPMENT MODE] Limited execution queue to 2 companies.")
+
+        from concurrent.futures import ThreadPoolExecutor
+        
+        def process_single_company(company):
+            try:
+                # 1. Fetch place details
+                details = client._get_place_details(company["google_place_id"])
+                if details:
+                    company["website"] = details.get("website", "")
+                    company["phone"] = details.get("formatted_phone_number", "")
+                    company["address"] = details.get("formatted_address", company["address"])
+
+                # 2. Extract website emails
+                website = company.get("website", "")
+                emails = []
+                if website:
+                    emails = client.extract_website_emails(website)
+                company["extracted_emails"] = emails
+
+                # 3. AI Enrichment (Unified fit score & cold email drafting in one call)
+                enriched = client.enrich_company_data(company, emails)
+                
+                # Check software company filter
+                if not enriched.get("is_software_company", True):
+                    print(f"  [Pipeline] Filtered out non-software company: {company['name']}")
+                    return None
+
+                # 4. Save to Database (thread-safe, with SQLite 30s timeout)
+                enriched["search_location"] = location
+                enriched["search_radius"] = radius
+                company_id = db.save_company(enriched)
 
                 # Save outreach email if generated
-                if company.get("email_data"):
+                if enriched.get("email_data"):
                     db.save_outreach_email({
                         "company_id": company_id,
-                        "extracted_emails": company.get("extracted_emails", []),
-                        "email_subject": company["email_data"].get("subject", ""),
-                        "email_body": company["email_data"].get("body", ""),
+                        "extracted_emails": enriched.get("extracted_emails", []),
+                        "email_subject": enriched["email_data"].get("subject", ""),
+                        "email_body": enriched["email_data"].get("body", ""),
                         "sent_status": "drafted"
                     })
                 # Save extracted emails even if no AI draft
-                elif company.get("extracted_emails"):
+                elif enriched.get("extracted_emails"):
                     db.save_outreach_email({
                         "company_id": company_id,
-                        "extracted_emails": company.get("extracted_emails", []),
+                        "extracted_emails": enriched.get("extracted_emails", []),
                         "email_subject": "",
                         "email_body": "",
                         "sent_status": "pending"
                     })
+                print(f"  [Pipeline] Successfully processed and saved: {company['name']}")
+                return company
+            except Exception as e:
+                print(f"  [Pipeline] Error processing company {company.get('name')}: {e}")
+                return None
+
+        # Concurrently process companies
+        max_workers = 5 if mode == "production" else 2
+        print(f"  [Pipeline] Processing {len(filtered_companies)} companies with concurrency limit {max_workers}...")
+        
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = [executor.submit(process_single_company, c) for c in filtered_companies]
+            for future in futures:
+                try:
+                    future.result()  # blocks until completed, raising exceptions if not handled
+                except Exception as ex:
+                    print(f"  [Pipeline] Uncaught thread exception: {ex}")
+                    
     except Exception as e:
         print(f"Error in background pipeline: {e}")
     finally:

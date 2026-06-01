@@ -88,9 +88,11 @@ class LocalOutreachClient:
         """
         coords = self.geocode_location(location)
         radius_meters = radius * 1000
-        all_places = {}
-
-        for query in self.SEARCH_QUERIES:
+        
+        from concurrent.futures import ThreadPoolExecutor
+        
+        def search_single(query):
+            places = []
             params = {
                 "location": f"{coords['lat']},{coords['lng']}",
                 "radius": radius_meters,
@@ -98,51 +100,61 @@ class LocalOutreachClient:
                 "type": "establishment",
                 "key": self.api_key,
             }
-            res = requests.get(self.GOOGLE_PLACES_URL, params=params)
-            data = res.json()
+            try:
+                res = requests.get(self.GOOGLE_PLACES_URL, params=params, timeout=10)
+                data = res.json()
+            except Exception as e:
+                print(f"  [PLACES API] Error searching query '{query}': {e}")
+                return []
 
             if data.get("status") not in ("OK", "ZERO_RESULTS"):
                 print(f"  [PLACES API] Warning: {data.get('status')} for query '{query}'")
-                continue
+                return []
 
             for place in data.get("results", []):
-                pid = place.get("place_id")
-                if pid and pid not in all_places:
-                    all_places[pid] = {
-                        "id": str(uuid.uuid4()),
-                        "name": place.get("name", ""),
-                        "address": place.get("vicinity", ""),
-                        "location": location,
-                        "google_rating": place.get("rating"),
-                        "google_place_id": pid,
-                        "types": place.get("types", []),
-                        "lat": place["geometry"]["location"]["lat"],
-                        "lng": place["geometry"]["location"]["lng"],
-                    }
+                places.append(place)
 
-            # Handle pagination (next_page_token)
             next_token = data.get("next_page_token")
             if next_token:
                 import time
                 time.sleep(2)  # Google requires delay before using next_page_token
                 params["pagetoken"] = next_token
-                del params["keyword"]
-                res2 = requests.get(self.GOOGLE_PLACES_URL, params=params)
-                data2 = res2.json()
-                for place in data2.get("results", []):
-                    pid = place.get("place_id")
-                    if pid and pid not in all_places:
-                        all_places[pid] = {
-                            "id": str(uuid.uuid4()),
-                            "name": place.get("name", ""),
-                            "address": place.get("vicinity", ""),
-                            "location": location,
-                            "google_rating": place.get("rating"),
-                            "google_place_id": pid,
-                            "types": place.get("types", []),
-                            "lat": place["geometry"]["location"]["lat"],
-                            "lng": place["geometry"]["location"]["lng"],
-                        }
+                if "keyword" in params:
+                    del params["keyword"]
+                try:
+                    res2 = requests.get(self.GOOGLE_PLACES_URL, params=params, timeout=10)
+                    data2 = res2.json()
+                    for place in data2.get("results", []):
+                        places.append(place)
+                except Exception as e:
+                    print(f"  [PLACES API] Error fetching page 2 for query '{query}': {e}")
+
+            return places
+
+        # Concurrently search Google Places across the 5 queries
+        all_places = {}
+        with ThreadPoolExecutor(max_workers=len(self.SEARCH_QUERIES)) as executor:
+            futures = {executor.submit(search_single, q): q for q in self.SEARCH_QUERIES}
+            for future in futures:
+                query = futures[future]
+                try:
+                    results = future.result()
+                    for place in results:
+                        pid = place.get("place_id")
+                        if pid and pid not in all_places:
+                            all_places[pid] = {
+                                "id": str(uuid.uuid4()),
+                                "name": place.get("name", ""),
+                                "address": place.get("vicinity", ""),
+                                "location": location,
+                                "google_rating": place.get("rating"),
+                                "google_place_id": pid,
+                                "types": place.get("types", []),
+                                "lat": place["geometry"]["location"]["lat"],
+                                "lng": place["geometry"]["location"]["lng"],
+                            }
+                except Exception as e:
+                    print(f"  [PLACES API] Concurrent worker error for query '{query}': {e}")
 
         companies = list(all_places.values())
         print(f"  [PLACES] Found {len(companies)} unique companies for '{location}'")
@@ -178,7 +190,8 @@ class LocalOutreachClient:
         all_emails = set()
         visited = set()
         queue = [url]
-        max_pages = 8
+        max_pages = 4
+        HIGH_PRIORITY_PREFIXES = ["hr@", "careers@", "jobs@", "recruitment@", "hello@", "contact@", "work@", "join@", "hiring@", "people@"]
 
         while queue and len(visited) < max_pages:
             current_url = queue.pop(0)
@@ -188,7 +201,7 @@ class LocalOutreachClient:
             visited.add(current_url)
             
             try:
-                res = self.session.get(current_url, timeout=10)
+                res = self.session.get(current_url, timeout=5)
                 if not res.ok:
                     continue
             except requests.RequestException:
@@ -223,16 +236,19 @@ class LocalOutreachClient:
             for email in text_emails:
                 all_emails.add(email.lower())
                 
+            # Clean emails found so far to check for high priority early stopping
+            clean_current = [e for e in all_emails if not self._is_noise_email(e)]
+            if any(any(e.startswith(prefix) for prefix in HIGH_PRIORITY_PREFIXES) for e in clean_current):
+                print(f"  [Scraper] Found high-priority corporate email: {next(e for e in clean_current if any(e.startswith(p) for p in HIGH_PRIORITY_PREFIXES))}. Stopping early.")
+                break
+
             # If we don't have enough emails and we are on the homepage, enqueue deeper pages
             is_homepage = current_url.rstrip("/") == url.rstrip("/")
             if len(all_emails) < 3 and is_homepage:
                 urls_to_add = []
                 
-                # 1. Standard blind guesses (High priority, append first)
-                for path in self.CAREER_PATHS:
-                    urls_to_add.append(urljoin(url, path))
-
-                # 2. Dynamic discovery from homepage links (Lower priority)
+                # 1. Dynamic discovery from homepage links (High priority - priority inversion!)
+                dynamic_urls = []
                 for link in soup.find_all("a", href=True):
                     href = link.get("href", "").lower()
                     text = link.get_text(strip=True).lower()
@@ -244,14 +260,26 @@ class LocalOutreachClient:
                     if any(kw in href or kw in text for kw in ["career", "contact", "job", "hiring", "join", "about", "team"]):
                         full_url = urljoin(current_url, link["href"])
                         if urlparse(full_url).netloc == urlparse(url).netloc:
-                            urls_to_add.append(full_url)
-                            
-                # Preserve order while deduplicating to avoid randomized set shuffling
+                            dynamic_urls.append(full_url)
+                
+                # Add unique dynamic URLs first
                 seen_to_add = set()
-                for u in urls_to_add:
+                for u in dynamic_urls:
                     if u not in visited and u not in queue and u not in seen_to_add:
                         seen_to_add.add(u)
-                        queue.append(u)
+                        urls_to_add.append(u)
+
+                # 2. Standard blind guesses as fallback (only if no dynamic links found)
+                if len(urls_to_add) == 0:
+                    fallback_paths = ["/careers", "/contact", "/contact-us"]
+                    for path in fallback_paths:
+                        full_url = urljoin(url, path)
+                        if full_url not in visited and full_url not in queue and full_url not in seen_to_add:
+                            seen_to_add.add(full_url)
+                            urls_to_add.append(full_url)
+                            
+                for u in urls_to_add:
+                    queue.append(u)
                         
         clean = [e for e in all_emails if not self._is_noise_email(e)]
         return sorted(set(clean))
@@ -278,10 +306,10 @@ class LocalOutreachClient:
     # ─── AI ENRICHMENT ──────────────────────────────────────────
     def enrich_company_data(self, company: dict, emails: list[str]) -> dict:
         """
-        Use AI to:
+        Use AI in a single unified call to:
           1. Classify if this is a real software/IT company (filter noise)
-          2. Generate a fit score
-          3. Draft personalized outreach email
+          2. Generate a fit score and reasoning
+          3. Draft a personalized outreach email (if fit score >= 40)
         Returns enriched company dict.
         """
         if not self.ai_handler:
@@ -290,100 +318,34 @@ class LocalOutreachClient:
             company["status"] = "email_found" if emails else "website_found"
             return company
 
-        # Step 1: Classify + Score
         profile = self.ai_handler.get_profile()
         profile_summary = json.dumps(profile, indent=2) if profile else "No profile available"
 
-        classify_prompt = f"""Analyze this company and determine:
-1. Is this a legitimate software/IT company? (Not a repair shop, training institute, or hardware store)
-2. How well does it match this candidate's profile?
+        unified_prompt = f"""Analyze the company details against the candidate profile to qualify the company and generate a cold outreach email in a single response.
 
-Company:
+Company Details:
 - Name: {company.get('name')}
 - Address: {company.get('address')}
 - Google Rating: {company.get('google_rating')}
 - Website: {company.get('website', 'N/A')}
 - Google Types: {company.get('types', [])}
+- Extracted Contact Emails: {emails}
 
 Candidate Profile:
 {profile_summary}
 
-Return JSON:
-{{
-  "is_software_company": true/false,
-  "fit_score": 0-100,
-  "reasoning": "brief explanation",
-  "company_type": "product/services/consulting/startup/other"
-}}"""
+Tasks to Perform:
+1. Classification & Fit Score:
+   - Determine if this is a legitimate software/IT/tech company (not a local repair shop, training institute, or hardware store).
+   - Generate a 'fit_score' from 0 to 100 based on how well their work aligns with the candidate's senior full-stack profile.
+   - Explain the 'reasoning' (brief, 1-2 sentences).
+   - Classify the 'company_type' (product, services, consulting, startup, or other).
 
-        response = self.ai_handler.generate_completion(
-            "You are a tech industry analyst. Classify companies accurately.",
-            classify_prompt,
-            json_mode=True
-        )
+2. Outreach Email Draft (Only if fit_score >= 40):
+   - If the fit_score is 40 or higher AND it is a legitimate software company, draft a personalized cold email (subject and body) to their careers/HR team on behalf of Kaushal Shah.
+   - If fit_score is less than 40, return `null` for the `email_draft` object.
 
-        if response:
-            try:
-                result = json.loads(response)
-                company["is_software_company"] = result.get("is_software_company", False)
-                company["fit_score"] = result.get("fit_score", 0)
-                company["fit_reasoning"] = result.get("reasoning", "")
-                company["company_type"] = result.get("company_type", "unknown")
-            except (json.JSONDecodeError, TypeError):
-                company["fit_score"] = 30
-                company["fit_reasoning"] = "AI parse error"
-                company["is_software_company"] = True  # Err on the side of inclusion
-
-        # Step 2: Generate outreach email (only for fit companies, even if no emails found)
-        email_data = None
-        if company.get("fit_score", 0) >= 40:
-            email_data = self._generate_outreach_email(company, emails, profile)
-
-        # Update status
-        if email_data:
-            company["status"] = "outreach_ready"
-        elif emails:
-            company["status"] = "email_found"
-        elif company.get("website"):
-            company["status"] = "website_found"
-        else:
-            company["status"] = "discovered"
-
-        # Build intelligence card
-        company["intelligence_card"] = {
-            "name": company.get("name"),
-            "address": company.get("address"),
-            "website": company.get("website"),
-            "google_rating": company.get("google_rating"),
-            "fit_score": company.get("fit_score"),
-            "fit_reasoning": company.get("fit_reasoning"),
-            "company_type": company.get("company_type", "unknown"),
-            "emails": emails,
-            "phone": company.get("phone", ""),
-        }
-
-        company["email_data"] = email_data
-        return company
-
-    def _generate_outreach_email(self, company: dict, emails: list[str], profile: dict) -> dict:
-        """Generate a personalized outreach email using AI."""
-        if not self.ai_handler:
-            return None
-
-        profile_summary = json.dumps(profile, indent=2) if profile else "No profile available"
-
-        prompt = f"""Draft a highly personalized, premium, and compelling cold outreach email to a company's HR/careers team for job opportunities on behalf of Kaushal Shah.
-
-Company Info:
-- Name: {company.get('name')}
-- Location: {company.get('address')}
-- Website: {company.get('website', 'N/A')}
-- Company Type: {company.get('company_type', 'IT')}
-
-Candidate Profile:
-{profile_summary}
-
-Rules:
+Cold Email Drafting Rules (Strictly Enforced):
 - Subject Line:
   1. Generate a dynamic, highly professional, and personalized subject line. DO NOT use the same exact subject line for every email.
   2. The subject line must be tailored specifically to the company, indicating an interest or exploration of senior opportunities (e.g., Senior Full-Stack Engineer, Senior Angular Developer, or Senior Software Engineer depending on what fits the company profile best).
@@ -412,24 +374,64 @@ Rules:
   5. DO NOT include any placeholders like [Your Contact Information], [Phone Number], or [LinkedIn Link].
   6. There should be no email signature at the very end of the email.
 
-Return JSON:
+Response Format:
+You MUST return a JSON object structured exactly as follows:
 {{
-  "subject": "...",
-  "body": "..."
+  "is_software_company": true/false,
+  "fit_score": 0-100,
+  "reasoning": "brief explanation",
+  "company_type": "product/services/consulting/startup/other",
+  "email_draft": {{
+    "subject": "cold email subject",
+    "body": "cold email body"
+  }} or null
 }}"""
 
         response = self.ai_handler.generate_completion(
-            "You are an expert career coach writing high-converting cold outreach emails.",
-            prompt,
+            "You are an expert career consultant and tech analyst.",
+            unified_prompt,
             json_mode=True
         )
 
+        email_data = None
         if response:
             try:
-                return json.loads(response)
+                result = json.loads(response)
+                company["is_software_company"] = result.get("is_software_company", False)
+                company["fit_score"] = result.get("fit_score", 0)
+                company["fit_reasoning"] = result.get("reasoning", "")
+                company["company_type"] = result.get("company_type", "unknown")
+                email_data = result.get("email_draft")
             except (json.JSONDecodeError, TypeError):
-                return None
-        return None
+                company["fit_score"] = 30
+                company["fit_reasoning"] = "AI parse error"
+                company["is_software_company"] = True  # Err on the side of inclusion
+
+        # Update status
+        if email_data:
+            company["status"] = "outreach_ready"
+        elif emails:
+            company["status"] = "email_found"
+        elif company.get("website"):
+            company["status"] = "website_found"
+        else:
+            company["status"] = "discovered"
+
+        # Build intelligence card
+        company["intelligence_card"] = {
+            "name": company.get("name"),
+            "address": company.get("address"),
+            "website": company.get("website"),
+            "google_rating": company.get("google_rating"),
+            "fit_score": company.get("fit_score"),
+            "fit_reasoning": company.get("fit_reasoning"),
+            "company_type": company.get("company_type", "unknown"),
+            "emails": emails,
+            "phone": company.get("phone", ""),
+        }
+
+        company["email_data"] = email_data
+        return company
 
     # ─── FULL PIPELINE ──────────────────────────────────────────
     def run_pipeline_batched(self, location: str, radius: int = 10, batch_size: int = 1, mode: str = "production"):
