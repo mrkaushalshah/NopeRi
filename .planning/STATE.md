@@ -30,3 +30,8 @@ Phase 4: Always-On Telegram Automation (1 plans)
 Phase: 07 (naukri-scraping-modernization) — EXECUTING
 Plan: 1 of 1
 Phase 04, Plan 04 (Incomplete)
+
+## Accumulated Context
+
+### Roadmap Evolution
+- Phase 06.1 inserted after Phase 6: Outreach Pipeline Optimization (URGENT)

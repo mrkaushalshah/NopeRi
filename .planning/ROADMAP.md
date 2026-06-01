@@ -73,6 +73,16 @@
 - Generate custom outreach subject and body. Save to SQLite database with pipeline status tracking.
 - Display in the UI for manual review, with "Copy to Clipboard" buttons for the email subject and body. No auto-email functionality.
 
+### Phase 06.1: Outreach Pipeline Optimization (INSERTED)
+
+**Goal:** [Urgent work - to be planned]
+**Requirements**: TBD
+**Depends on:** Phase 6
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 06.1 to break down)
+
 ### Phase 7: Naukri Scraping Modernization
 - Complete overhaul of `NaukriLoginClient` and `NaukriJobClient` to use `PlaywrightCrawler` from Crawlee.
 - Completely remove Selenium, geckodriver, and `get_Nkparam.py`.
