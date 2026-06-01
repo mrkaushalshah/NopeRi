@@ -42,7 +42,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         max_retries = 2
         for attempt in range(max_retries):
             try:
-                result = jc.apply_job(job, mandatory_skills=mandatory, optional_skills=optional, source="search")
+                result = await jc.apply_job(job, mandatory_skills=mandatory, optional_skills=optional, source="search")
                 job_result = (result.get("jobs") or [{}])[0]
                 
                 # Helper to check if already applied
@@ -58,7 +58,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     return
 
                 if job_result.get("questionnaire"):
-                    q_result = jc.handle_ai_questionnaire_and_apply(
+                    q_result = await jc.handle_ai_questionnaire_and_apply(
                         job, 
                         job_result["questionnaire"], 
                         sid="", 
@@ -140,7 +140,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     print(f"{Fore.YELLOW}Session expired. Attempting auto-login (attempt {attempt+1}/{max_retries})...{Style.RESET_ALL}")
                     await query.edit_message_text(text="🔄 Session expired. Auto-logging in and retrying...")
                     try:
-                        jc._client.login()
+                        await jc._client.login()
                         # Next iteration will retry the application
                     except Exception as login_e:
                         print(f"{Fore.RED}Auto-login failed: {login_e}{Style.RESET_ALL}")
@@ -186,7 +186,7 @@ async def job_search_loop(app: ApplicationBuilder):
                 for page in range(1, 5):
                     print(f"Fetching page {page}...")
                     try:
-                        raw_jobs = jc.search_jobs(
+                        raw_jobs = await jc.search_jobs(
                             keyword=query["keyword"], 
                             location=query["location"], 
                             experience=4, 
@@ -285,29 +285,6 @@ async def job_search_loop(app: ApplicationBuilder):
         print(f"{Fore.YELLOW}Sleeping for 10 minutes...{Style.RESET_ALL}")
         await asyncio.sleep(600)
 
-async def session_heartbeat():
-    """Periodically touches the Naukri API to keep the session alive."""
-    global jc
-    while True:
-        await asyncio.sleep(600) # Every 10 minutes
-        try:
-            if jc and jc._client and jc._client.naukri_session:
-                print(f"{Fore.BLUE}Heartbeat: Keeping session active...{Style.RESET_ALL}")
-                # Fetching profile ID is a lightweight authenticated request
-                jc._client.fetch_profile_id()
-                print(f"{Fore.BLUE}Heartbeat: Session touched successfully.{Style.RESET_ALL}")
-            else:
-                print(f"{Fore.YELLOW}Heartbeat: No active session to touch.{Style.RESET_ALL}")
-        except NaukriAuthError:
-            print(f"{Fore.YELLOW}Heartbeat: Session expired during touch. Re-logging in...{Style.RESET_ALL}")
-            try:
-                jc._client.login()
-                print(f"{Fore.GREEN}Heartbeat: Re-login successful.{Style.RESET_ALL}")
-            except Exception as login_e:
-                print(f"{Fore.RED}Heartbeat: Re-login failed: {login_e}{Style.RESET_ALL}")
-        except Exception as e:
-            print(f"{Fore.RED}Heartbeat error: {e}{Style.RESET_ALL}")
-
 async def main_async():
     global jc, logger
     
@@ -319,7 +296,7 @@ async def main_async():
         print(f"{Fore.RED}Warning: TELEGRAM_BOT_TOKEN is missing or not set in .env{Style.RESET_ALL}")
 
     client = NaukriLoginClient(username, password)
-    client.login()
+    await client.login()
 
     ai = AIHandler()
     ai.extract_profile()
@@ -335,9 +312,8 @@ async def main_async():
         await app.start()
         await app.updater.start_polling()
 
-    # Run the search loop and heartbeat concurrently
+    # Run the search loop concurrently
     search_task = asyncio.create_task(job_search_loop(app))
-    heartbeat_task = asyncio.create_task(session_heartbeat())
     
     try:
         while True:
@@ -346,7 +322,6 @@ async def main_async():
         pass
     finally:
         search_task.cancel()
-        heartbeat_task.cancel()
         if app:
             await app.updater.stop()
             await app.stop()
