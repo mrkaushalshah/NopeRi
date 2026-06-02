@@ -190,21 +190,44 @@ async def job_search_loop(app: ApplicationBuilder):
                 
                 for page in range(1, 5):
                     print(f"Fetching page {page}...")
-                    try:
-                        raw_jobs = await jc.search_jobs(
-                            keyword=query["keyword"], 
-                            location=query["location"], 
-                            experience=4, 
-                            job_age=2,
-                            page=page
-                        )
-                    except Exception as e:
-                        if "400" in str(e) and "Requested page number doesn't exists" in str(e):
-                            print(f"{Fore.YELLOW}  No more pages available for this query.{Style.RESET_ALL}")
+                    
+                    max_retries = 3
+                    raw_jobs = None
+                    page_failed = False
+                    
+                    for attempt in range(max_retries):
+                        try:
+                            raw_jobs = await jc.search_jobs(
+                                keyword=query["keyword"], 
+                                location=query["location"], 
+                                experience=4, 
+                                job_age=2,
+                                page=page
+                            )
                             break
-                        else:
-                            print(f"{Fore.RED}  Error on page {page}: {e}{Style.RESET_ALL}")
+                        except NaukriAuthError as auth_err:
+                            if attempt < max_retries - 1:
+                                print(f"{Fore.YELLOW}  Session expired during search. Attempting auto-login (attempt {attempt+1}/{max_retries})...{Style.RESET_ALL}")
+                                try:
+                                    await jc._client.login()
+                                    # Continue retry loop to fetch jobs with new session context
+                                except Exception as login_e:
+                                    print(f"{Fore.RED}  Auto-login failed: {login_e}{Style.RESET_ALL}")
+                                    await asyncio.sleep(5)
+                            else:
+                                print(f"{Fore.RED}  Search failed after {max_retries} attempts due to authorization error: {auth_err}{Style.RESET_ALL}")
+                                page_failed = True
+                                break
+                        except Exception as e:
+                            if "400" in str(e) and "Requested page number doesn't exists" in str(e):
+                                print(f"{Fore.YELLOW}  No more pages available for this query.{Style.RESET_ALL}")
+                            else:
+                                print(f"{Fore.RED}  Error on page {page}: {e}{Style.RESET_ALL}")
+                            page_failed = True
                             break
+                    
+                    if page_failed or raw_jobs is None:
+                        break
 
                     if not raw_jobs:
                         print(f"{Fore.YELLOW}  No more jobs found for this query on page {page}.{Style.RESET_ALL}")

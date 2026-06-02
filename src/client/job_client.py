@@ -20,9 +20,15 @@ class NaukriJobClient:
             raise NaukriAuthError("Login required")
 
         self._client = login_client
-        self.context = login_client.naukri_session.context # Playwright BrowserContext
-        self.request = self.context.request # Playwright APIRequestContext
         self.ai_handler = ai_handler
+
+    @property
+    def context(self):
+        return self._client.naukri_session.context
+
+    @property
+    def request(self):
+        return self._client.naukri_session.context.request
 
     def _parse_job(self, raw: dict) -> Job:
         if "post" in raw and "companyName" in raw: # v2
@@ -242,8 +248,8 @@ class NaukriJobClient:
         # or the WAF tokens just pass through without manual JS evaluation.
         res = await self.request.get(url, headers=headers, params=params)
 
-        if res.status == 403:
-            raise NaukriAuthError("403 Forbidden — Playwright context failed to bypass WAF")
+        if res.status in (401, 403):
+            raise NaukriAuthError(f"Auth failed during search: {res.status} — {await res.text()}")
         if res.status == 406:
             return []
         if not res.ok:

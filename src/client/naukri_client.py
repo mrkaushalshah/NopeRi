@@ -25,6 +25,12 @@ class NaukriLoginClient:
     async def login(self):
         logger.info("Starting login with Crawlee PlaywrightCrawler...")
         
+        # Clean up existing persistent browser / context to avoid resource leaks
+        try:
+            await self.close()
+        except Exception as e:
+            logger.debug(f"Error during cleanup of previous browser context: {e}")
+            
         self.crawler = PlaywrightCrawler(
             headless=True,
         )
