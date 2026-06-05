@@ -195,7 +195,7 @@
                 [class.bg-white-200]="activeFilter === 'ready'"
                 [class.text-white]="activeFilter === 'ready'"
                 [class.text-stone-400]="activeFilter !== 'ready'">
-          Ready ({{ stats.drafted - stats.sent }})
+          Ready ({{ stats.drafted - stats.sent - stats.bounced }})
         </button>
         <button (click)="activeFilter = 'high-score'" 
                 class="px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer"

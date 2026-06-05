@@ -49,3 +49,22 @@ npm start
 If you want to run the complete Phase 6 experience, you need these running simultaneously:
 1. `uvicorn src.api.app:app --reload` (Backend API)
 2. `cd ui && npm start` (Angular UI)
+
+## 4. Unified Telegram Controller Bot
+
+Instead of running separate terminal sessions, you can run the unified Telegram Controller bot to start, stop, and monitor all automation scripts remotely.
+
+### Start the Telegram Controller
+From the root directory (`NopeRi`), run:
+```bash
+python telegram_controller.py
+```
+
+This single command boots the controller, which will automatically restore any services that were previously running.
+
+### Telegram Commands
+* `/start` / `/status` - View the interactive control panel with inline start/stop buttons.
+* `/logs <emails|companies|profile|controller>` - View the last 20 lines of clean stdout/stderr logs.
+* `/find_companies Location | Radius` - Start company email search (e.g. `/find_companies Baner, Pune | 10`).
+* `/stop_all` - Instantly shut down all running services.
+
