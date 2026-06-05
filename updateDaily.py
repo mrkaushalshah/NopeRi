@@ -3,7 +3,8 @@ import json
 import os
 import random
 import re
-from datetime import datetime
+import time
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -14,18 +15,18 @@ password = os.environ.get("NAUKRI_PASSWORD", "")
 
 # Professional headlines generated from resume.txt
 HEADLINES = [
-    'Senior Full-Stack Developer | Angular 18+ | .NET Core | Node.js | AI Automation',
-    'Senior Software Developer | Expert in Angular, .NET Core & Node.js | 4.5+ Yrs Exp',
-    'Full-Stack Architect | AI Automation Products | Angular & .NET Core Expert',
+    'Senior Full-Stack Developer | Angular (14-19) | .NET Core | Node.js | Immediate Joiner',
+    'Senior Full-Stack Developer | Expert in Angular, .NET Core & Node.js | 4.5+ Yrs Exp',
+    'Senior Full-Stack Engineer | Enterprise SaaS & Cloud Architecture | Active Seeker',
     'Senior Software Engineer | Specialized in FinTech & LegalTech SaaS | Full-Stack',
-    'Founder & Senior Developer | Building AI-driven Web Solutions | Angular & Node.js',
-    'Senior Full-Stack Developer | .NET Core & Angular Specialist | Pune, India',
-    'AI Automation Engineer | Senior Full-Stack Developer | Node.js & Angular',
-    'Senior Software Developer (4.5+ Years) | Angular, C#, Node.js & AI Specialist',
-    'Full-Stack Developer | Building Enterprise SaaS with .NET Core & Angular',
-    'Senior Developer | Angular 18, .NET Core & AI-powered Automations',
-    'Sr. Full-Stack Developer | SaaS & Fintech Expert | Angular / .NET / Node',
-    'Senior Software Developer | Cloud Architecture | AI Workflows | Full-Stack'
+    'Senior Full-Stack Developer | Angular, C#, Node.js & Azure DevOps | Immediate Joiner',
+    'Senior Full-Stack Developer | .NET Core & Angular Specialist | Pune / Remote',
+    'Senior Software Engineer | Building AI-Driven SaaS & Web Solutions | Full-Stack',
+    'Senior Software Developer (4.5+ Years) | Angular, C#, Node.js & Microservices',
+    'Senior Full-Stack Engineer | Building Enterprise Applications with .NET Core & Angular',
+    'Senior Developer | Angular 19, .NET Core & High-Performance Web Systems',
+    'Sr. Full-Stack Developer | SaaS & Fintech Expert | Angular / .NET / Node.js',
+    'Senior Software Developer | Cloud Infrastructure | CI/CD Pipelines | Full-Stack'
 ]
 
 def get_mutated_headline():
@@ -186,8 +187,32 @@ def handler(event, context):
 
 
 # ================== CONTINUOUS RUNNER ==================
+def sleep_until_next_window():
+    """ Sleeps until the next optimal recruiter sourcing window in India. """
+    now = datetime.now()
+    # Windows in hours/minutes (9:30 AM, 2:00 PM, 5:30 PM IST)
+    windows = [(9, 30), (14, 0), (17, 30)]
+    
+    next_run = None
+    for h, m in windows:
+        candidate = now.replace(hour=h, minute=m, second=0, microsecond=0)
+        if candidate > now:
+            next_run = candidate
+            break
+            
+    if not next_run:
+        # If all windows passed today, schedule for 9:30 AM tomorrow
+        next_run = now.replace(hour=9, minute=30, second=0, microsecond=0) + timedelta(days=1)
+        
+    sleep_seconds = (next_run - now).total_seconds()
+    # Add a random jitter of +/- 10 minutes (600 seconds) to make the schedule look completely natural
+    jitter = random.randint(-600, 600)
+    sleep_seconds = max(60, sleep_seconds + jitter)
+    
+    print(f"Next update scheduled at: {next_run.strftime('%Y-%m-%d %H:%M:%S')} (in {sleep_seconds // 3600:.0f}h {(sleep_seconds % 3600) // 60:.0f}m)")
+    time.sleep(sleep_seconds)
+
 def continuous_runner():
-    import time
     print("Starting continuous profile updater...")
     
     if not username or not password:
@@ -229,10 +254,8 @@ def continuous_runner():
         except Exception as e:
             print(f"Error during update: {e}")
             
-        # Random sleep between 15 to 45 minutes to simulate natural behavior
-        sleep_time = random.randint(900, 2700) 
-        print(f"Next update in {sleep_time // 60}m {sleep_time % 60}s\n")
-        time.sleep(sleep_time)
+        # Sleep until the next recruiter peak activity window instead of rapid-fire updates
+        sleep_until_next_window()
 
 
 # ================== EXECUTION ==================

@@ -24,11 +24,16 @@ class NaukriJobClient:
 
     @property
     def context(self):
+        if not self._client or not self._client.naukri_session or not self._client.naukri_session.context:
+            raise NaukriAuthError("Session context is not initialized or has been closed")
         return self._client.naukri_session.context
 
     @property
     def request(self):
-        return self._client.naukri_session.context.request
+        try:
+            return self.context.request
+        except AttributeError:
+            raise NaukriAuthError("Session request context is not initialized or has been closed")
 
     def _parse_job(self, raw: dict) -> Job:
         if "post" in raw and "companyName" in raw: # v2
@@ -107,7 +112,12 @@ class NaukriJobClient:
             "sec-fetch-dest": "empty",
         })
         
-        res = await self.request.get(url, headers=headers, params=params)
+        try:
+            res = await self.request.get(url, headers=headers, params=params)
+        except Exception as e:
+            if "closed" in str(e).lower() or "context" in str(e).lower() or "browser" in str(e).lower():
+                raise NaukriAuthError(f"Session request context was closed: {e}")
+            raise e
         
         if res.status in (401, 403):
             data = await res.json()
@@ -151,7 +161,12 @@ class NaukriJobClient:
             "accept": "application/json",
         })
 
-        res = await self.request.post(APPLY_JOB_URL, headers=headers, data=payload)
+        try:
+            res = await self.request.post(APPLY_JOB_URL, headers=headers, data=payload)
+        except Exception as e:
+            if "closed" in str(e).lower() or "context" in str(e).lower() or "browser" in str(e).lower():
+                raise NaukriAuthError(f"Session request context was closed: {e}")
+            raise e
         
         if res.status in (401, 403):
             try:
@@ -201,7 +216,12 @@ class NaukriJobClient:
         }
 
         headers = self._client._build_headers(auth=True)
-        res = await self.request.post(APPLY_JOB_URL, headers=headers, data=payload)
+        try:
+            res = await self.request.post(APPLY_JOB_URL, headers=headers, data=payload)
+        except Exception as e:
+            if "closed" in str(e).lower() or "context" in str(e).lower() or "browser" in str(e).lower():
+                return {"success": False, "error": f"Session request context was closed: {e}"}
+            raise e
         
         if not res.ok:
             return {"success": False, "error": await res.text()}
@@ -246,7 +266,12 @@ class NaukriJobClient:
 
         # Notice we are no longer sending `nkparam` header at all. Playwright/Crawlee context handles it inherently, 
         # or the WAF tokens just pass through without manual JS evaluation.
-        res = await self.request.get(url, headers=headers, params=params)
+        try:
+            res = await self.request.get(url, headers=headers, params=params)
+        except Exception as e:
+            if "closed" in str(e).lower() or "context" in str(e).lower() or "browser" in str(e).lower():
+                raise NaukriAuthError(f"Session request context was closed: {e}")
+            raise e
 
         if res.status in (401, 403):
             raise NaukriAuthError(f"Auth failed during search: {res.status} — {await res.text()}")

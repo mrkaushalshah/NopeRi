@@ -75,7 +75,7 @@ class JobFilterPipeline2:
     FRONTEND_VETO_KEYWORDS = {
         "android", "ios", "flutter", "mobile", "kotlin", "swift",
         "embedded", "firmware",
-        "ml engineer", "data engineer", "data scientist","intern", "internship", "lead","Golang","MLops","devops","mlops", "golang"," Web developer - Java Technologies"
+        "ml engineer", "data engineer", "data scientist","intern", "internship","Golang","MLops","devops","mlops", "golang"," Web developer - Java Technologies"
         ," Member of Technical Staff - MTS"
     }
 

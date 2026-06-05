@@ -43,22 +43,25 @@ class NaukriLoginClient:
             nonlocal token, storage_state
             
             logger.info("Navigating to Naukri login...")
-            await context.page.goto("https://www.naukri.com/nlogin/login")
-            await context.page.fill('input[id="usernameField"]', self.username)
-            await context.page.fill('input[id="passwordField"]', self.password)
-            await context.page.click('button[type="submit"]')
-            
-            logger.info("Waiting for login to complete...")
             try:
+                await context.page.goto("https://www.naukri.com/nlogin/login", wait_until="load", timeout=30000)
+                await context.page.wait_for_selector('input[id="usernameField"]', timeout=15000)
+                await context.page.fill('input[id="usernameField"]', self.username)
+                await context.page.fill('input[id="passwordField"]', self.password)
+                await context.page.click('button[type="submit"]')
+                
+                logger.info("Waiting for login to complete...")
                 await context.page.wait_for_selector('.view-profile-wrapper', timeout=20000)
                 logger.info("Profile wrapper detected! Extracting credentials...")
                 storage_state = await context.page.context.storage_state()
                 cookies = await context.page.context.cookies()
                 token = next((c.get("value") for c in cookies if c.get("name") == "nauk_at"), None)
             except Exception as e:
-                logger.error(f"Login failed: {e}")
-                # Save screenshot to diagnostics in case of failures
-                await context.page.screenshot(path="naukri_login_error.png")
+                logger.error(f"Login failed inside handler: {e}")
+                try:
+                    await context.page.screenshot(path="naukri_login_error.png")
+                except:
+                    pass
 
         # Run the crawler with the login page
         await self.crawler.run(["https://www.naukri.com/nlogin/login"])
@@ -109,9 +112,28 @@ class NaukriLoginClient:
         return "123456"
 
     async def close(self):
-        if self.browser_context:
-            await self.browser_context.close()
-        if self.browser:
-            await self.browser.close()
-        if self.playwright:
-            await self.playwright.stop()
+        try:
+            if self.browser_context:
+                await self.browser_context.close()
+        except Exception as e:
+            logger.debug(f"Failed to close browser context: {e}")
+        finally:
+            self.browser_context = None
+
+        try:
+            if self.browser:
+                await self.browser.close()
+        except Exception as e:
+            logger.debug(f"Failed to close browser: {e}")
+        finally:
+            self.browser = None
+
+        try:
+            if self.playwright:
+                await self.playwright.stop()
+        except Exception as e:
+            logger.debug(f"Failed to stop playwright: {e}")
+        finally:
+            self.playwright = None
+
+        self.naukri_session = None

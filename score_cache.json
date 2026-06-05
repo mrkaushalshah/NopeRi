@@ -2070,5 +2070,373 @@
   "010626029984": {
     "score": 0,
     "reason": "Zero stack overlap, candidate is a developer"
+  },
+  "020626003623": {
+    "score": 90,
+    "reason": ".NET Software Developer role with C# and Azure, strong match"
+  },
+  "020626013290": {
+    "score": 95,
+    "reason": "Senior .NET Developer role with required .NET and optional Angular, perfect match."
+  },
+  "020626014014": {
+    "score": 30,
+    "reason": "Role has some overlap with SQL and Angular but is heavily dominated by Java and other technologies."
+  },
+  "300326018390": {
+    "score": 50,
+    "reason": "Full stack role with AI focus, but requires AI/ML experience which is not in the candidate's core stack."
+  },
+  "020626006236": {
+    "score": 0,
+    "reason": "Zero stack overlap, Java Full Stack Developer role"
+  },
+  "020626005573": {
+    "score": 0,
+    "reason": "Role focused on Java with no relevant stack overlap."
+  },
+  "010626008150": {
+    "score": 70,
+    "reason": "Full Stack role with Angular and .NET optional, but Java is mandatory"
+  },
+  "020626500115": {
+    "score": 0,
+    "reason": "Role is vague and focuses on health insurance, not relevant to candidate's IT background."
+  },
+  "020626501020": {
+    "score": 50,
+    "reason": "Angular is mandatory but the role is heavily focused on Java with no .NET or Node.js"
+  },
+  "020626501937": {
+    "score": 30,
+    "reason": "Role lacks core stack overlap, primarily focused on front end without specified technologies."
+  },
+  "020626502619": {
+    "score": 50,
+    "reason": "Full Stack UI Developer role with C# and Angular optional, but requires 2-7 years experience which is slightly off."
+  },
+  "020626502618": {
+    "score": 0,
+    "reason": "Zero stack overlap, role is focused on PHP"
+  },
+  "020626501329": {
+    "score": 0,
+    "reason": "Zero stack overlap, primarily ServiceNow with no relevant technologies for the candidate."
+  },
+  "020626502207": {
+    "score": 0,
+    "reason": "Zero stack overlap, candidate is a developer and role is focused on C++ and automotive"
+  },
+  "020626018231": {
+    "score": 0,
+    "reason": "Zero stack overlap, role is focused on GIS and integration with no relevant tech."
+  },
+  "020626018173": {
+    "score": 30,
+    "reason": "Familiar tech present but role is vague and lacks core stack relevance."
+  },
+  "020626502872": {
+    "score": 0,
+    "reason": "Zero stack overlap, primarily Python/Ruby/PHP"
+  },
+  "130825014367": {
+    "score": 100,
+    "reason": "Perfect match for .NET & Angular Full-stack Developer role."
+  },
+  "020626924355": {
+    "score": 30,
+    "reason": "Role is primarily frontend with React, which does not match the candidate's core stack."
+  },
+  "020626026406": {
+    "score": 0,
+    "reason": "Zero stack overlap, candidate is a developer"
+  },
+  "020626500966": {
+    "score": 30,
+    "reason": "Familiar tech present but heavily dominated by Java, candidate's core stack is not aligned"
+  },
+  "030626012464": {
+    "score": 30,
+    "reason": "Role is a Frontend Developer, but requires UI/UX and lacks core stack"
+  },
+  "030626012916": {
+    "score": 0,
+    "reason": "Role is a Java Full Stack Developer, no overlap with candidate's core stack."
+  },
+  "020626028376": {
+    "score": 50,
+    "reason": "Node.js present but experience requirement is slightly lower than candidate's."
+  },
+  "030626012006": {
+    "score": 30,
+    "reason": "Role focused on data warehousing and Python, minimal overlap with candidate's core stack."
+  },
+  "030626011374": {
+    "score": 50,
+    "reason": "Role requires Java and Angular, but candidate's experience is primarily with .NET and Node.js."
+  },
+  "030626008897": {
+    "score": 30,
+    "reason": "Familiar tech present but heavily dominated by Java"
+  },
+  "030626928073": {
+    "score": 90,
+    "reason": "Strong match with .NET and C#, suitable for senior role"
+  },
+  "030626928126": {
+    "score": 90,
+    "reason": "Strong match with .NET and C#, suitable for senior role"
+  },
+  "030626503402": {
+    "score": 30,
+    "reason": "Familiar tech present but heavily dominated by PHP"
+  },
+  "020626012760": {
+    "score": 0,
+    "reason": "Zero stack overlap, primarily PHP"
+  },
+  "030626501047": {
+    "score": 30,
+    "reason": "Familiar tech present but primarily focused on CI/CD and not core stack"
+  },
+  "300625004042": {
+    "score": 0,
+    "reason": "Pure QA testing role, candidate is a developer"
+  },
+  "030626501261": {
+    "score": 0,
+    "reason": "Zero stack overlap, primarily C++ and Linux"
+  },
+  "030626504922": {
+    "score": 0,
+    "reason": "Zero stack overlap, primarily Java and Spring"
+  },
+  "040626013760": {
+    "score": 90,
+    "reason": "Dot Net Developer role with mandatory C# and .NET Core, strong match."
+  },
+  "020626019263": {
+    "score": 90,
+    "reason": "Dot Net Developer role with mandatory C# and .NET Core, strong match."
+  },
+  "290426014345": {
+    "score": 0,
+    "reason": "Java Developer role with no overlap with candidate's core stack."
+  },
+  "290426014287": {
+    "score": 0,
+    "reason": "Senior Java Developer role with no overlap with candidate's core stack."
+  },
+  "030626918209": {
+    "score": 0,
+    "reason": "Role focuses on Java and test automation, not a match for core skills."
+  },
+  "030626012989": {
+    "score": 0,
+    "reason": "Java Developer role with no overlap with candidate's core stack."
+  },
+  "030626918202": {
+    "score": 0,
+    "reason": "Role focuses on transaction processing and cloud networking, not a match for core skills."
+  },
+  "020626500718": {
+    "score": 0,
+    "reason": "Java Developer role with no overlap with candidate's core stack."
+  },
+  "030626918283": {
+    "score": 0,
+    "reason": "Role focuses on Java and network architecture, not a match for core skills."
+  },
+  "030626504057": {
+    "score": 0,
+    "reason": "Role focuses on access management with no relevant tech stack."
+  },
+  "030626504297": {
+    "score": 30,
+    "reason": "Web Developer role is vague and lacks focus on core technologies."
+  },
+  "030626029135": {
+    "score": 0,
+    "reason": "Apigee Developer role with no overlap with candidate's core stack."
+  },
+  "030626024849": {
+    "score": 95,
+    "reason": "Dot Net Developer role with mandatory C# and .NET Core, strong match"
+  },
+  "030626502380": {
+    "score": 0,
+    "reason": "QA Automation Engineer role, candidate is a developer"
+  },
+  "220426010924": {
+    "score": 0,
+    "reason": "Site Reliability Engineer role, no relevant development stack"
+  },
+  "240426026187": {
+    "score": 30,
+    "reason": "SDET role with C# but primarily focused on testing, weak fit"
+  },
+  "140126027308": {
+    "score": 90,
+    "reason": "Fullstack Developer role with mandatory C# and optional Angular, strong match"
+  },
+  "040626015824": {
+    "score": 0,
+    "reason": "Senior Frontend Developer role focused on React/Next.js, no Angular"
+  },
+  "020626005217": {
+    "score": 0,
+    "reason": "Senior Software Engineer role focused on Java, no relevant stack"
+  },
+  "030626503328": {
+    "score": 0,
+    "reason": "PreSales Engineer role, non-development position"
+  },
+  "030626033127": {
+    "score": 0,
+    "reason": "Autosar Developer role, no relevant development stack"
+  },
+  "030626014211": {
+    "score": 50,
+    "reason": "C# is mandatory, but the role is focused on Dynamics CRM which is not a perfect match."
+  },
+  "030626027592": {
+    "score": 0,
+    "reason": "Pure QA automation role, candidate is a developer."
+  },
+  "030626010128": {
+    "score": 30,
+    "reason": "Java is mandatory and the role is heavily focused on Java stack, with minimal overlap."
+  },
+  "020626502833": {
+    "score": 0,
+    "reason": "Salesforce development role, candidate is a developer."
+  },
+  "060526000026": {
+    "score": 0,
+    "reason": "Role is focused on streaming and concurrency programming, with no relevant stack overlap."
+  },
+  "030626502659": {
+    "score": 30,
+    "reason": "Power BI role with some SQL overlap, but primarily focused on BI which is not aligned."
+  },
+  "030626502027": {
+    "score": 0,
+    "reason": "Zero stack overlap, focuses on automation and DB2"
+  },
+  "020626007149": {
+    "score": 0,
+    "reason": "Zero stack overlap, focuses on Gen AI and data science"
+  },
+  "050526044380": {
+    "score": 0,
+    "reason": "Pure Java Automation role, no overlap with candidate's stack."
+  },
+  "030626501644": {
+    "score": 30,
+    "reason": "UI/UX role with minimal development focus, lacks core stack alignment."
+  },
+  "030626500887": {
+    "score": 50,
+    "reason": "Full Stack role but primarily focused on Python and AI, not a strong match for candidate's .NET/Angular skills."
+  },
+  "040626009072": {
+    "score": 0,
+    "reason": "Infrastructure Specialist role, no overlap with candidate's development skills"
+  },
+  "100326016136": {
+    "score": 0,
+    "reason": "Senior Software Engineer role focused on C/C++ and algorithms, no overlap with candidate's stack"
+  },
+  "040626008411": {
+    "score": 0,
+    "reason": "Powershell Automation Engineer role, no overlap with candidate's development skills"
+  },
+  "040626014993": {
+    "score": 0,
+    "reason": "Tosca Automation Engineer role, focused on testing, no overlap with candidate's development skills"
+  },
+  "040626009921": {
+    "score": 0,
+    "reason": "Test Automation Framework Engineer role, focused on Java and testing, no overlap with candidate's development skills"
+  },
+  "040626015739": {
+    "score": 30,
+    "reason": "Pure frontend role with React, not aligned with candidate's Angular preference."
+  },
+  "030626503484": {
+    "score": 0,
+    "reason": "Zero stack overlap, role is focused on Azure Databricks and not development"
+  },
+  "030626021076": {
+    "score": 30,
+    "reason": "Familiar tech present but heavily dominated by React and Java"
+  },
+  "030626031241": {
+    "score": 0,
+    "reason": "Zero stack overlap, primarily Java and Spring"
+  },
+  "030626504891": {
+    "score": 30,
+    "reason": "Role is vague with no core stack overlap, automation is not specific to candidate's skills"
+  },
+  "030626503067": {
+    "score": 30,
+    "reason": "Software Engineer role is vague with no core stack overlap, operational excellence not aligned with candidate's skills"
+  },
+  "020626021061": {
+    "score": 0,
+    "reason": "Salesforce-focused role with no overlap with candidate's core stack."
+  },
+  "040626008607": {
+    "score": 0,
+    "reason": "Dell Boomi Developer role with no overlap with candidate's core stack."
+  },
+  "030626504047": {
+    "score": 90,
+    "reason": "Dot Net & C# Software Engineer role aligns well with candidate's .NET skills."
+  },
+  "030626032763": {
+    "score": 0,
+    "reason": "Guidewire-focused role with no overlap with candidate's core stack."
+  },
+  "020626500965": {
+    "score": 30,
+    "reason": "Java FullStack Developer role with a focus on Java, not aligned with candidate's core stack."
+  },
+  "030626501135": {
+    "score": 30,
+    "reason": "Role requires jQuery and COBOL, not aligned with candidate's core stack."
+  },
+  "040626011511": {
+    "score": 0,
+    "reason": "Quant Developer role with no relevant tech stack overlap."
+  },
+  "030626930821": {
+    "score": 0,
+    "reason": "Role requires Python and AI engineering, no overlap with candidate's stack."
+  },
+  "030626503304": {
+    "score": 30,
+    "reason": "Role is vague and heavily focused on Ruby on Rails, not aligned with candidate's stack."
+  },
+  "040626011914": {
+    "score": 0,
+    "reason": "Role requires Oracle technologies, no overlap with candidate's stack."
+  },
+  "040626000256": {
+    "score": 0,
+    "reason": "Role requires Informatica, no overlap with candidate's stack."
+  },
+  "030626503719": {
+    "score": 0,
+    "reason": "Role is focused on network engineering, no overlap with candidate's stack."
+  },
+  "030626503303": {
+    "score": 30,
+    "reason": "Role is vague and lacks specific technologies aligned with the candidate's experience."
+  },
+  "040626018129": {
+    "score": 0,
+    "reason": "Kafka Engineer role with no overlap in required skills, candidate is a developer"
   }
 }
