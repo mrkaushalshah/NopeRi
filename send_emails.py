@@ -15,6 +15,8 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 import re
+import imaplib
+import email
 
 load_dotenv()
 
@@ -68,6 +70,42 @@ def send_telegram_message(text):
         resp.raise_for_status()
     except Exception as e:
         print(f"Error sending Telegram notification: {e}")
+
+def select_best_email(email_list):
+    """Prioritizes HR/Career emails and filters out sales/support/billing emails and junk syntax."""
+    if not email_list:
+        return None
+        
+    # Standardize to lowercase and strictly validate email format
+    # This prevents scraping bugs like "+@domain.com" from being selected
+    valid_emails = []
+    for e in email_list:
+        e_lower = e.lower().strip()
+        # Must start with letter/number, can contain . _ -, and must have valid domain
+        if re.match(r'^[a-z0-9][a-z0-9._-]*@[a-z0-9.-]+\.[a-z]{2,}$', e_lower):
+            valid_emails.append(e_lower)
+            
+    if not valid_emails:
+        return None
+    
+    # Priority 1: Direct HR and Hiring (Highest success rate)
+    for e in valid_emails:
+        if any(keyword in e for keyword in ['hr@', 'career', 'jobs@', 'recruitment', 'talent', 'hiring', 'people']):
+            return e
+            
+    # Priority 2: Founders, Management, or general Info
+    for e in valid_emails:
+        if any(keyword in e for keyword in ['ceo@', 'founder@', 'director@', 'admin@', 'info@', 'contact@', 'hello@', 'hi@', 'team@']):
+            return e
+            
+    # Priority 3: Fallback, but strictly avoid negative departments
+    negatives = ['sales@', 'support@', 'billing@', 'noreply@', 'no-reply@', 'marketing@', 'press@', 'media@', 'help@']
+    for e in valid_emails:
+        if not any(neg in e for neg in negatives):
+            return e
+            
+    # If all extracted emails are in the negative list, skip sending.
+    return None
 
 def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
@@ -185,8 +223,94 @@ def send_email_via_smtp(recipient, subject, body_text):
         except:
             pass
 
+def check_bounces():
+    """Connects to Gmail via IMAP, finds bounced emails, updates DB, and notifies Telegram."""
+    if not SMTP_USER or not SMTP_PASSWORD:
+        return
+        
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Checking inbox for new bounced emails...")
+    try:
+        mail = imaplib.IMAP4_SSL("imap.gmail.com")
+        mail.login(SMTP_USER, SMTP_PASSWORD)
+        mail.select("inbox")
+        
+        # Search for failure notifications
+        status, messages = mail.search(None, '(OR FROM "mailer-daemon@googlemail.com" SUBJECT "Delivery Status Notification (Failure)")')
+        if status != "OK":
+            return
+            
+        email_ids = messages[0].split()
+        if not email_ids:
+            return
+            
+        bounced_count = 0
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        for e_id in email_ids:
+            res, msg_data = mail.fetch(e_id, '(RFC822)')
+            if res != "OK": continue
+            
+            body = ""
+            for response_part in msg_data:
+                if isinstance(response_part, tuple):
+                    msg = email.message_from_bytes(response_part[1])
+                    if msg.is_multipart():
+                        for part in msg.walk():
+                            if part.get_content_type() == "text/plain":
+                                try:
+                                    body = part.get_payload(decode=True).decode()
+                                    break
+                                except: pass
+                    else:
+                        try:
+                            body = msg.get_payload(decode=True).decode()
+                        except: pass
+            
+            # Extract emails from body
+            found_emails = re.findall(r'[\w\.-]+@[\w\.-]+\.\w+', body)
+            bounced_addresses = [e for e in found_emails if e.lower() != SMTP_USER.lower() and 'mailer-daemon' not in e.lower() and 'google.com' not in e.lower()]
+            
+            if bounced_addresses:
+                # The first extracted non-Google email is usually the one that failed
+                bounced_addr = bounced_addresses[0]
+                
+                # Check if we sent an email to this address recently
+                cursor.execute("""
+                    SELECT c.id as company_id, e.id as email_id, c.name 
+                    FROM outreach_emails e
+                    JOIN companies c ON c.id = e.company_id
+                    WHERE e.extracted_emails LIKE ? AND e.sent_status = 'sent'
+                """, (f'%{bounced_addr}%',))
+                
+                row = cursor.fetchone()
+                if row:
+                    cursor.execute("UPDATE outreach_emails SET sent_status = 'bounced' WHERE id = ?", (row['email_id'],))
+                    cursor.execute("UPDATE companies SET status = 'bounced' WHERE id = ?", (row['company_id'],))
+                    conn.commit()
+                    bounced_count += 1
+                    
+                    send_telegram_message(f"🚨 <b>Bounced Email Detected</b>\n🏢 <b>Company:</b> {row['name']}\n📬 <b>Failed Address:</b> {bounced_addr}")
+                    
+                # Move the bounce notification to Trash so we don't process it again
+                mail.store(e_id, '+FLAGS', '\\Deleted')
+                
+        if bounced_count > 0:
+            print(f"Processed {bounced_count} bounced emails. Database updated.")
+            
+        mail.expunge()
+        mail.close()
+        mail.logout()
+    except Exception as e:
+        print(f"Error tracking bounced emails: {e}")
+
 def process_pending_emails(test_email=None):
     """Fetches drafted emails. If test_email is provided, sends a preview of the FIRST draft and exits."""
+    
+    # Check for bounces first before sending new ones
+    if not test_email:
+        check_bounces()
+        
     print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Checking for drafted outreach emails...")
     
     if not os.path.exists(DB_PATH):
@@ -241,11 +365,16 @@ def process_pending_emails(test_email=None):
 
         if not emails:
             print(f"[{idx+1}/{len(drafted_emails)}] Skipped {company_name} - No email addresses found.")
-            # Mark it skipped or pending so it doesn't get stuck
             update_sent_status(company_id, email_id)
             continue
 
-        recipient = emails[0] # Send to the first email address in the extracted list
+        recipient = select_best_email(emails)
+        
+        if not recipient:
+            print(f"[{idx+1}/{len(drafted_emails)}] Skipped {company_name} - Filtered out bad emails (only sales/support found).")
+            # Update DB so it doesn't get stuck in the queue
+            update_sent_status(company_id, email_id)
+            continue
         
         # --- TEST MODE OVERRIDE ---
         if test_email:

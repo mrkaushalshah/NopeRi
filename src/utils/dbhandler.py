@@ -361,12 +361,21 @@ class OutreachDB:
             """, params)
             sent = cursor.fetchone()[0]
 
+            cursor.execute(f"""
+                SELECT COUNT(DISTINCT c.id) FROM companies c
+                JOIN outreach_emails e ON c.id = e.company_id
+                WHERE e.sent_status = 'bounced'
+                {'AND c.search_location = ?' if search_location else ''}
+            """, params)
+            bounced = cursor.fetchone()[0]
+
             return {
                 "discovered": total,
                 "website_found": with_website,
                 "email_found": with_emails,
                 "drafted": drafted,
-                "sent": sent
+                "sent": sent,
+                "bounced": bounced
             }
         finally:
             conn.close()

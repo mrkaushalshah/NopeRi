@@ -138,6 +138,7 @@ export class CompanyCard implements OnInit, OnChanges {
     switch (this.company.status) {
       case 'outreach_ready': return '✉️';
       case 'sent_manually': return '✅';
+      case 'bounced': return '❌';
       case 'responded': return '🎉';
       case 'email_found': return '📧';
       case 'website_found': return '🌐';

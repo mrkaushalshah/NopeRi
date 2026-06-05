@@ -38,6 +38,7 @@ export interface PipelineStats {
   email_found: number;
   drafted: number;
   sent: number;
+  bounced: number;
 }
 
 export interface SearchResponse {

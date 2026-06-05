@@ -20,7 +20,7 @@ export class Dashboard implements OnInit, OnDestroy {
 
   // Data state
   companies: Company[] = [];
-  stats: PipelineStats = { discovered: 0, website_found: 0, email_found: 0, drafted: 0, sent: 0 };
+  stats: PipelineStats = { discovered: 0, website_found: 0, email_found: 0, drafted: 0, sent: 0, bounced: 0 };
   savedLocations: string[] = [];
   verifications: { [email: string]: { status: string, score: number } } = {};
 
@@ -147,6 +147,7 @@ export class Dashboard implements OnInit, OnDestroy {
           case 'high-score': return (c.fit_score || 0) >= 70;
           case 'with-email': return c.outreach_emails?.some(e => e.email_subject);
           case 'sent': return c.status === 'sent_manually';
+          case 'bounced': return c.status === 'bounced';
           default: return true;
         }
       });
