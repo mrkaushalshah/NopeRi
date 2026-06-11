@@ -18,15 +18,31 @@ export class CompanyCard implements OnInit, OnChanges {
   isUpdating = false;
   isDeleting = false;
 
+  latestUpdateText = '';
+  isSavingUpdate = false;
+  isUpdateSaved = false;
+
   constructor(private api: ApiService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     this.syncVerifications();
+    this.initLatestUpdateText();
   }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['globalVerifications']) {
       this.syncVerifications();
+    }
+    if (changes['company']) {
+      this.initLatestUpdateText();
+    }
+  }
+
+  initLatestUpdateText() {
+    if (this.company?.outreach_emails?.length) {
+      this.latestUpdateText = this.company.outreach_emails[0].latest_update || '';
+    } else {
+      this.latestUpdateText = '';
     }
   }
 
@@ -39,11 +55,101 @@ export class CompanyCard implements OnInit, OnChanges {
     }
   }
 
+  onUpdateTextInput(event: Event) {
+    const target = event.target as HTMLInputElement;
+    this.latestUpdateText = target.value;
+  }
+
+  saveLatestUpdate() {
+    if (!this.company) return;
+    this.isSavingUpdate = true;
+    this.isUpdateSaved = false;
+    this.cdr.detectChanges();
+
+    if (!this.company.outreach_emails?.length) {
+      const payload = {
+        extracted_emails: [],
+        email_subject: '',
+        email_body: '',
+        sent_status: 'pending',
+        latest_update: this.latestUpdateText
+      };
+      this.api.createEmail(this.company.id, payload).subscribe({
+        next: (res) => {
+          this.company.outreach_emails = [{
+            id: res.email_id,
+            company_id: this.company.id,
+            extracted_emails: '[]',
+            email_subject: '',
+            email_body: '',
+            sent_status: 'pending',
+            created_at: new Date().toISOString(),
+            latest_update: this.latestUpdateText
+          }];
+          this.isSavingUpdate = false;
+          this.isUpdateSaved = true;
+          this.statusChanged.emit();
+          this.cdr.detectChanges();
+          setTimeout(() => {
+            this.isUpdateSaved = false;
+            this.cdr.detectChanges();
+          }, 3000);
+        },
+        error: (err) => {
+          console.error('Failed to create email entry:', err);
+          this.isSavingUpdate = false;
+          this.cdr.detectChanges();
+        }
+      });
+    } else {
+      const emailId = this.company.outreach_emails[0].id;
+      this.api.updateEmailLatestUpdate(emailId, this.latestUpdateText).subscribe({
+        next: () => {
+          this.company.outreach_emails[0].latest_update = this.latestUpdateText;
+          this.isSavingUpdate = false;
+          this.isUpdateSaved = true;
+          this.cdr.detectChanges();
+          setTimeout(() => {
+            this.isUpdateSaved = false;
+            this.cdr.detectChanges();
+          }, 3000);
+        },
+        error: (err) => {
+          console.error('Failed to update latest update text:', err);
+          this.isSavingUpdate = false;
+          this.cdr.detectChanges();
+        }
+      });
+    }
+  }
+
   markAsSent() {
     this.isUpdating = true;
     this.api.updateCompanyStatus(this.company.id, 'sent_manually').subscribe({
       next: () => {
         this.company.status = 'sent_manually';
+        if (this.company.outreach_emails?.length) {
+          this.company.outreach_emails[0].sent_status = 'sent';
+        }
+        this.isUpdating = false;
+        this.statusChanged.emit();
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.isUpdating = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  markAsBounced() {
+    this.isUpdating = true;
+    this.api.updateCompanyStatus(this.company.id, 'bounced').subscribe({
+      next: () => {
+        this.company.status = 'bounced';
+        if (this.company.outreach_emails?.length) {
+          this.company.outreach_emails[0].sent_status = 'bounced';
+        }
         this.isUpdating = false;
         this.statusChanged.emit();
         this.cdr.detectChanges();

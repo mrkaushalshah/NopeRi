@@ -30,6 +30,7 @@ export interface OutreachEmail {
   email_body: string;
   sent_status: string;
   created_at: string;
+  latest_update?: string;
 }
 
 export interface PipelineStats {
@@ -98,9 +99,17 @@ export class ApiService {
     return this.http.delete(`${this.baseUrl}/companies/${companyId}`);
   }
 
+  createEmail(companyId: string, payload: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/companies/${companyId}/emails`, payload);
+  }
+
 
   updateEmailStatus(emailId: string, sentStatus: string): Observable<any> {
     return this.http.put(`${this.baseUrl}/emails/${emailId}/status`, { sent_status: sentStatus });
+  }
+
+  updateEmailLatestUpdate(emailId: string, latestUpdate: string): Observable<any> {
+    return this.http.put(`${this.baseUrl}/emails/${emailId}/latest-update`, { latest_update: latestUpdate });
   }
 
   getStats(location?: string): Observable<PipelineStats> {

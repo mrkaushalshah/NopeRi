@@ -80,10 +80,10 @@
   }
 </td>
 
-<!-- Outreach Draft -->
+<!-- Outreach Draft & Status -->
 <td class="px-4 py-4 align-top w-1/2">
-  @if (emailSubject || emailBody) {
-    <div class="space-y-3">
+  <div class="space-y-3">
+    @if (emailSubject || emailBody) {
       <!-- Subject -->
       <div>
         <div class="flex justify-between items-center mb-1">
@@ -113,42 +113,69 @@
           {{ emailBody }}
         </div>
       </div>
+    } @else {
+      <span class="text-xs text-stone-600 italic block mb-2">Draft pending or not applicable</span>
+    }
+    
+    <!-- Latest Update Notes Field -->
+    <div class="bg-white/[0.02] border border-white/[0.04] p-2.5 rounded space-y-1.5">
+      <div class="flex justify-between items-center">
+        <span class="text-[9px] text-stone-500 uppercase tracking-wider font-semibold">Latest Update Note</span>
+        @if (isUpdateSaved) {
+          <span class="text-[9px] text-emerald-400 font-semibold animate-pulse">✓ Saved to Database</span>
+        }
+      </div>
+      <div class="flex gap-2">
+        <input type="text" 
+               [value]="latestUpdateText" 
+               (input)="onUpdateTextInput($event)"
+               (keyup.enter)="saveLatestUpdate()"
+               placeholder="e.g. Bounced, scheduled call, got response..." 
+               class="flex-1 bg-white/[0.03] border border-white/[0.08] rounded px-2 py-1 text-xs text-stone-300 placeholder:text-stone-600 focus:outline-none focus:border-indigo-500/50 transition-colors">
+        <button (click)="saveLatestUpdate()" 
+                [disabled]="isSavingUpdate"
+                class="px-2.5 py-1 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 text-xs font-semibold rounded border border-indigo-500/20 transition-colors disabled:opacity-50 cursor-pointer">
+          {{ isSavingUpdate ? 'Saving...' : 'Save' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex justify-end gap-2 pt-2 border-t border-white/[0.06] items-center">
+      @if (emails.length > 0) {
+        <button (click)="openInZohoMail()"
+                class="px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-[10px] uppercase tracking-wider font-semibold rounded border border-blue-500/20 transition-colors cursor-pointer">
+          📧 Compose Zoho
+        </button>
+      }
       
-      <!-- Actions -->
-      <div class="flex justify-end gap-2 pt-2 border-t border-white/[0.06]">
-        @if (emails.length > 0) {
-          <button (click)="openInZohoMail()"
-                  class="px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-[10px] uppercase tracking-wider font-semibold rounded transition-colors">
-            📧 Compose Mail
-          </button>
-        }
-        @if (company.status !== 'sent_manually') {
-          <button (click)="markAsSent()" [disabled]="isUpdating"
-                  class="px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 text-[10px] uppercase tracking-wider font-semibold rounded transition-colors disabled:opacity-50">
-            {{ isUpdating ? 'Updating...' : 'Mark as Sent' }}
-          </button>
-        } @else {
-          <span class="px-3 py-1.5 bg-emerald-500/10 text-emerald-400 text-[10px] uppercase tracking-wider font-semibold rounded flex items-center gap-1">
-            ✓ Sent
-          </span>
-        }
-        <button (click)="deleteEntry()" [disabled]="isDeleting"
-                class="px-2 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-[10px] uppercase tracking-wider font-semibold rounded transition-colors disabled:opacity-50"
-                title="Delete Entry">
-          {{ isDeleting ? '...' : '🗑️' }}
+      @if (company.status === 'sent_manually') {
+        <span class="px-3 py-1.5 bg-emerald-500/10 text-emerald-400 text-[10px] uppercase tracking-wider font-semibold rounded border border-emerald-500/20 flex items-center gap-1">
+          ✓ Sent
+        </span>
+      } @else {
+        <button (click)="markAsSent()" [disabled]="isUpdating"
+                class="px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 text-[10px] uppercase tracking-wider font-semibold rounded border border-indigo-500/20 transition-colors disabled:opacity-50 cursor-pointer">
+          Mark Sent
         </button>
-      </div>
-    </div>
-  } @else {
-    <div class="flex flex-col gap-2">
-      <span class="text-xs text-stone-600 italic">Draft pending or not applicable</span>
-      <div class="flex pt-1">
-        <button (click)="deleteEntry()" [disabled]="isDeleting"
-                class="px-2 py-1 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-[10px] uppercase tracking-wider font-semibold rounded transition-colors disabled:opacity-50 flex items-center gap-1"
-                title="Delete Entry">
-          {{ isDeleting ? '...' : '🗑️ Delete' }}
+      }
+
+      @if (company.status === 'bounced') {
+        <span class="px-3 py-1.5 bg-red-500/10 text-red-400 text-[10px] uppercase tracking-wider font-semibold rounded border border-red-500/20 flex items-center gap-1">
+          ❌ Bounced
+        </span>
+      } @else {
+        <button (click)="markAsBounced()" [disabled]="isUpdating"
+                class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-[10px] uppercase tracking-wider font-semibold rounded border border-red-500/20 transition-colors disabled:opacity-50 cursor-pointer">
+          Mark Bounce
         </button>
-      </div>
+      }
+
+      <button (click)="deleteEntry()" [disabled]="isDeleting"
+              class="px-2.5 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-[10px] uppercase tracking-wider font-semibold rounded border border-red-500/20 transition-colors disabled:opacity-50 cursor-pointer"
+              title="Delete Entry">
+        {{ isDeleting ? '...' : '🗑️' }}
+      </button>
     </div>
-  }
+  </div>
 </td>

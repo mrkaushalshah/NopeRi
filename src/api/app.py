@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 import json
 import os
 import sys
@@ -38,6 +38,18 @@ class StatusUpdate(BaseModel):
 
 class EmailStatusUpdate(BaseModel):
     sent_status: str
+
+
+class LatestUpdatePayload(BaseModel):
+    latest_update: str
+
+
+class EmailCreatePayload(BaseModel):
+    extracted_emails: List[str] = []
+    email_subject: str = ""
+    email_body: str = ""
+    sent_status: str = "drafted"
+    latest_update: str = ""
 
 
 # ─── ENDPOINTS ──────────────────────────────────────────────────
@@ -216,12 +228,17 @@ async def update_company_status(company_id: str, update: StatusUpdate):
     if not success:
         raise HTTPException(status_code=404, detail="Company not found")
     
-    # Also update email status if it's sent
+    # Also update email status if it's sent or bounced
     if update.status == 'sent_manually':
         company = db.get_company_with_emails(company_id)
         if company and company.get("outreach_emails"):
             for email in company["outreach_emails"]:
                 db.update_email_status(email["id"], "sent")
+    elif update.status == 'bounced':
+        company = db.get_company_with_emails(company_id)
+        if company and company.get("outreach_emails"):
+            for email in company["outreach_emails"]:
+                db.update_email_status(email["id"], "bounced")
                 
     return {"status": "updated"}
 
@@ -239,6 +256,21 @@ async def get_company(company_id: str):
     return company
 
 
+@app.post("/api/companies/{company_id}/emails")
+async def create_outreach_email(company_id: str, body: EmailCreatePayload):
+    """Create a new outreach email record for a company."""
+    email_dict = {
+        "company_id": company_id,
+        "extracted_emails": body.extracted_emails,
+        "email_subject": body.email_subject,
+        "email_body": body.email_body,
+        "sent_status": body.sent_status,
+        "latest_update": body.latest_update
+    }
+    email_id = db.save_outreach_email(email_dict)
+    return {"status": "created", "email_id": email_id}
+
+
 @app.delete("/api/companies/{company_id}")
 async def delete_company(company_id: str):
     """Delete a company and its emails."""
@@ -251,7 +283,7 @@ async def delete_company(company_id: str):
 @app.put("/api/companies/{company_id}/status")
 async def update_company_status(company_id: str, body: StatusUpdate):
     """Update a company's pipeline status (e.g. 'sent_manually')."""
-    valid_statuses = ["discovered", "website_found", "email_found", "outreach_ready", "sent_manually", "responded", "skipped"]
+    valid_statuses = ["discovered", "website_found", "email_found", "outreach_ready", "sent_manually", "responded", "skipped", "bounced"]
     if body.status not in valid_statuses:
         raise HTTPException(status_code=400, detail=f"Invalid status. Must be one of: {valid_statuses}")
     success = db.update_company_status(company_id, body.status)
@@ -263,13 +295,22 @@ async def update_company_status(company_id: str, body: StatusUpdate):
 @app.put("/api/emails/{email_id}/status")
 async def update_email_status(email_id: str, body: EmailStatusUpdate):
     """Update an outreach email's sent status."""
-    valid = ["drafted", "pending", "sent", "replied"]
+    valid = ["drafted", "pending", "sent", "replied", "bounced"]
     if body.sent_status not in valid:
         raise HTTPException(status_code=400, detail=f"Invalid status. Must be one of: {valid}")
     success = db.update_email_status(email_id, body.sent_status)
     if not success:
         raise HTTPException(status_code=404, detail="Email record not found")
     return {"status": "updated", "email_id": email_id, "new_status": body.sent_status}
+
+
+@app.put("/api/emails/{email_id}/latest-update")
+async def update_email_latest_update(email_id: str, body: LatestUpdatePayload):
+    """Update the latest status update note/comment of an outreach email."""
+    success = db.update_email_latest_update(email_id, body.latest_update)
+    if not success:
+        raise HTTPException(status_code=404, detail="Email record not found")
+    return {"status": "updated", "email_id": email_id, "latest_update": body.latest_update}
 
 
 @app.get("/api/stats")

@@ -116,6 +116,7 @@ class OutreachDB:
             email_body TEXT,
             sent_status TEXT DEFAULT 'drafted',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            latest_update TEXT,
             FOREIGN KEY (company_id) REFERENCES companies(id)
         )
         """)
@@ -128,6 +129,12 @@ class OutreachDB:
             verified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
         """)
+
+        # Schema migrations
+        try:
+            cursor.execute("SELECT latest_update FROM outreach_emails LIMIT 1")
+        except sqlite3.OperationalError:
+            cursor.execute("ALTER TABLE outreach_emails ADD COLUMN latest_update TEXT")
 
         conn.commit()
         conn.close()
@@ -172,8 +179,8 @@ class OutreachDB:
             email_id = email_dict.get("id", str(uuid.uuid4()))
             cursor.execute("""
                 INSERT OR REPLACE INTO outreach_emails
-                (id, company_id, extracted_emails, email_subject, email_body, sent_status, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                (id, company_id, extracted_emails, email_subject, email_body, sent_status, created_at, latest_update)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 email_id,
                 email_dict.get("company_id", ""),
@@ -181,7 +188,8 @@ class OutreachDB:
                 email_dict.get("email_subject", ""),
                 email_dict.get("email_body", ""),
                 email_dict.get("sent_status", "drafted"),
-                datetime.now().isoformat()
+                datetime.now().isoformat(),
+                email_dict.get("latest_update", "")
             ))
             conn.commit()
             return email_id
@@ -319,6 +327,19 @@ class OutreachDB:
             cursor.execute(
                 "UPDATE outreach_emails SET sent_status = ? WHERE id = ?",
                 (sent_status, email_id)
+            )
+            conn.commit()
+            return cursor.rowcount > 0
+        finally:
+            conn.close()
+
+    def update_email_latest_update(self, email_id, latest_update):
+        conn = self._connect()
+        cursor = conn.cursor()
+        try:
+            cursor.execute(
+                "UPDATE outreach_emails SET latest_update = ? WHERE id = ?",
+                (latest_update, email_id)
             )
             conn.commit()
             return cursor.rowcount > 0
