@@ -102,6 +102,7 @@ def load_state():
             pass
     return {
         "email_automation": "stopped",
+        "bounce_checking": "stopped",
         "company_finding": "stopped",
         "job_finding": "stopped",
         "profile_update": "stopped"
@@ -127,13 +128,17 @@ def authorized(func):
 # Subprocess Management
 def start_subprocess(name, cmd, log_filename):
     try:
+        env = os.environ.copy()
+        env["PYTHONIOENCODING"] = "utf-8"
         log_file = open(f"logs/{log_filename}", "a", encoding="utf-8")
         proc = subprocess.Popen(
             cmd,
             stdout=log_file,
             stderr=subprocess.STDOUT,
             text=True,
-            bufsize=1
+            bufsize=1,
+            env=env,
+            encoding="utf-8"
         )
         active_processes[name] = (proc, log_file)
         logger.info(f"Started subprocess {name} with PID {proc.pid}")
@@ -210,6 +215,7 @@ def stop_job_finding_task():
 # UI Text and Keyboard generators
 def get_status_text(state):
     email_status = "🟢 RUNNING" if state.get("email_automation") == "running" else "🛑 STOPPED"
+    bounce_status = "🟢 RUNNING" if state.get("bounce_checking") == "running" else "🛑 STOPPED"
     company_status = "🟢 RUNNING" if state.get("company_finding") == "running" else "🛑 STOPPED"
     job_status = "🟢 RUNNING" if state.get("job_finding") == "running" else "🛑 STOPPED"
     profile_status = "🟢 RUNNING" if state.get("profile_update") == "running" else "🛑 STOPPED"
@@ -217,6 +223,7 @@ def get_status_text(state):
     text = (
         "🤖 <b>NopeRi Automation Command Deck</b>\n\n"
         f"📧 <b>Email Automation:</b> {email_status}\n"
+        f"🛡️ <b>Bounce Checking:</b> {bounce_status}\n"
         f"🏢 <b>Company Email Finding:</b> {company_status}\n"
         f"🔍 <b>Naukri Job Finder:</b> {job_status}\n"
         f"👤 <b>Naukri Profile Update:</b> {profile_status}\n\n"
@@ -230,6 +237,10 @@ def get_status_keyboard(state):
     # Email Automation row
     email_label = "🛑 Stop Email Automation" if state.get("email_automation") == "running" else "📧 Start Email Automation"
     keyboard.append([InlineKeyboardButton(email_label, callback_data="toggle_emails")])
+    
+    # Bounce Checking row
+    bounce_label = "🛑 Stop Bounce Checking" if state.get("bounce_checking") == "running" else "🛡️ Start Bounce Checking"
+    keyboard.append([InlineKeyboardButton(bounce_label, callback_data="toggle_bounces")])
     
     # Company Finding row
     company_label = "🛑 Stop Company Finding" if state.get("company_finding") == "running" else "🏢 Start Company Finding"
@@ -271,6 +282,7 @@ async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     stats = db.get_pipeline_stats()
     
     email_status = "🟢 RUNNING" if state.get("email_automation") == "running" else "🛑 STOPPED"
+    bounce_status = "🟢 RUNNING" if state.get("bounce_checking") == "running" else "🛑 STOPPED"
     company_status = "🟢 RUNNING" if state.get("company_finding") == "running" else "🛑 STOPPED"
     job_status = "🟢 RUNNING" if state.get("job_finding") == "running" else "🛑 STOPPED"
     profile_status = "🟢 RUNNING" if state.get("profile_update") == "running" else "🛑 STOPPED"
@@ -279,6 +291,7 @@ async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "🤖 <b>NopeRi Automation Command Deck</b>\n\n"
         "<b>Service Statuses:</b>\n"
         f"📧 <b>Email Automation:</b> {email_status}\n"
+        f"🛡️ <b>Bounce Checking:</b> {bounce_status}\n"
         f"🏢 <b>Company Email Finding:</b> {company_status}\n"
         f"🔍 <b>Naukri Job Finder:</b> {job_status}\n"
         f"👤 <b>Naukri Profile Update:</b> {profile_status}\n\n"
@@ -299,6 +312,7 @@ async def logs_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     log_files = {
         "emails": "logs/email_automation.log",
+        "bounces": "logs/bounce_checking.log",
         "companies": "logs/company_finding.log",
         "profile": "logs/profile_update.log",
         "controller": "logs/controller.log"
@@ -306,7 +320,7 @@ async def logs_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     if service not in log_files:
         await update.message.reply_text(
-            "❌ Invalid service. Choose from: <code>emails</code>, <code>companies</code>, <code>profile</code>, <code>controller</code>.\n"
+            "❌ Invalid service. Choose from: <code>emails</code>, <code>bounces</code>, <code>companies</code>, <code>profile</code>, <code>controller</code>.\n"
             "Example: <code>/logs emails</code>",
             parse_mode='HTML'
         )
@@ -374,6 +388,9 @@ async def stop_all_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     stop_subprocess("email_automation")
     state["email_automation"] = "stopped"
+    
+    stop_subprocess("bounce_checking")
+    state["bounce_checking"] = "stopped"
     
     stop_subprocess("company_finding")
     state["company_finding"] = "stopped"
@@ -478,13 +495,29 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             state["email_automation"] = "stopped"
             await query.answer("Email Automation stopped.")
         else:
-            cmd = [sys.executable, "send_emails.py", "--loop", "--interval", "15"]
+            cmd = [sys.executable, "send_emails.py", "--loop", "--interval", "15", "--send-only"]
             pid = start_subprocess("email_automation", cmd, "email_automation.log")
             if pid:
                 state["email_automation"] = "running"
                 await query.answer(f"Email Automation started (PID: {pid}).")
             else:
                 await query.answer("Failed to start Email Automation.", show_alert=True)
+        save_state(state)
+        await edit_message_safe(query, text=get_status_text(state), reply_markup=get_status_keyboard(state), parse_mode='HTML')
+        
+    elif data == "toggle_bounces":
+        if state.get("bounce_checking") == "running":
+            stop_subprocess("bounce_checking")
+            state["bounce_checking"] = "stopped"
+            await query.answer("Bounce Checking stopped.")
+        else:
+            cmd = [sys.executable, "send_emails.py", "--loop", "--interval", "15", "--bounce-only"]
+            pid = start_subprocess("bounce_checking", cmd, "bounce_checking.log")
+            if pid:
+                state["bounce_checking"] = "running"
+                await query.answer(f"Bounce Checking started (PID: {pid}).")
+            else:
+                await query.answer("Failed to start Bounce Checking.", show_alert=True)
         save_state(state)
         await edit_message_safe(query, text=get_status_text(state), reply_markup=get_status_keyboard(state), parse_mode='HTML')
         
@@ -610,6 +643,7 @@ async def monitor_subprocesses(bot):
                     
                     friendly_names = {
                         "email_automation": "📧 Email Automation",
+                        "bounce_checking": "🛡️ Bounce Checking",
                         "company_finding": "🏢 Company Email Finding",
                         "profile_update": "👤 Naukri Profile Daily Update"
                     }
@@ -620,6 +654,8 @@ async def monitor_subprocesses(bot):
                         service_name = "companies"
                     elif name == "email_automation":
                         service_name = "emails"
+                    elif name == "bounce_checking":
+                        service_name = "bounces"
                     elif name == "profile_update":
                         service_name = "profile"
                     
@@ -652,12 +688,22 @@ async def resume_active_services(application):
 
     # Resume Email Automation
     if state.get("email_automation") == "running":
-        cmd = [sys.executable, "send_emails.py", "--loop", "--interval", "15"]
+        cmd = [sys.executable, "send_emails.py", "--loop", "--interval", "15", "--send-only"]
         pid = start_subprocess("email_automation", cmd, "email_automation.log")
         if pid:
             logger.info(f"Resumed Email Automation (PID: {pid})")
         else:
             state["email_automation"] = "stopped"
+            save_state(state)
+
+    # Resume Bounce Checking
+    if state.get("bounce_checking") == "running":
+        cmd = [sys.executable, "send_emails.py", "--loop", "--interval", "15", "--bounce-only"]
+        pid = start_subprocess("bounce_checking", cmd, "bounce_checking.log")
+        if pid:
+            logger.info(f"Resumed Bounce Checking (PID: {pid})")
+        else:
+            state["bounce_checking"] = "stopped"
             save_state(state)
 
     # Resume Profile Updater

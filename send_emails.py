@@ -1,5 +1,9 @@
 import os
 import sys
+
+if sys.platform == 'win32':
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stderr.reconfigure(encoding='utf-8')
 import time
 import json
 import sqlite3
@@ -108,7 +112,7 @@ def select_best_email(email_list):
     return None
 
 def get_db_connection():
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=15.0)
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -304,12 +308,15 @@ def check_bounces():
     except Exception as e:
         print(f"Error tracking bounced emails: {e}")
 
-def process_pending_emails(test_email=None):
+def process_pending_emails(test_email=None, run_bounces=True, run_sends=True):
     """Fetches drafted emails. If test_email is provided, sends a preview of the FIRST draft and exits."""
     
     # Check for bounces first before sending new ones
-    if not test_email:
+    if run_bounces and not test_email:
         check_bounces()
+        
+    if not run_sends:
+        return
         
     print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Checking for drafted outreach emails...")
     
@@ -426,13 +433,19 @@ def process_pending_emails(test_email=None):
 
     print(f"\nFinished processing. Sent {sent_count} email(s) successfully.")
 
-def continuous_runner(loop_interval_minutes):
-    print(f"Starting continuous email sender (checking database every {loop_interval_minutes} minutes)...")
-    send_telegram_message(f"🤖 <b>Email Sender Automation Active</b>\nChecking <code>outreach.db</code> every {loop_interval_minutes} minutes for new drafts.")
+def continuous_runner(loop_interval_minutes, run_bounces=True, run_sends=True):
+    mode_text = "Email Sender & Bounce Checking"
+    if run_bounces and not run_sends:
+        mode_text = "Bounce Checking Only"
+    elif run_sends and not run_bounces:
+        mode_text = "Email Sender Only"
+        
+    print(f"Starting continuous {mode_text} (checking database every {loop_interval_minutes} minutes)...")
+    send_telegram_message(f"🤖 <b>{mode_text} Active</b>\nChecking <code>outreach.db</code> every {loop_interval_minutes} minutes.")
     
     while True:
         try:
-            process_pending_emails()
+            process_pending_emails(run_bounces=run_bounces, run_sends=run_sends)
         except Exception as e:
             print(f"Error in automation loop: {e}")
         
@@ -443,13 +456,20 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="NopeRi Zoho SMTP Email Outreach Automation")
     parser.add_argument("--loop", action="store_true", help="Run continuously in a loop")
     parser.add_argument("--interval", type=int, default=15, help="Loop check interval in minutes (default: 15)")
+    parser.add_argument("--bounce-only", action="store_true", help="Only run bounce checking")
+    parser.add_argument("--send-only", action="store_true", help="Only run email sending")
     parser.add_argument("--test", type=str, metavar="EMAIL", help="Run in test mode: Sends the first drafted email to the specified EMAIL address and does not update the database.")
     args = parser.parse_args()
 
+    run_bounces = True
+    run_sends = True
+    if args.bounce_only: run_sends = False
+    if args.send_only: run_bounces = False
+
     if args.test:
         print(f"Starting in TEST MODE. Target: {args.test}")
-        process_pending_emails(test_email=args.test)
+        process_pending_emails(test_email=args.test, run_bounces=run_bounces, run_sends=run_sends)
     elif args.loop:
-        continuous_runner(args.interval)
+        continuous_runner(args.interval, run_bounces=run_bounces, run_sends=run_sends)
     else:
-        process_pending_emails()
+        process_pending_emails(run_bounces=run_bounces, run_sends=run_sends)

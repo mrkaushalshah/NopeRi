@@ -1,6 +1,7 @@
 {
-  "email_automation": "running",
+  "email_automation": "stopped",
   "company_finding": "stopped",
   "job_finding": "stopped",
-  "profile_update": "stopped"
+  "profile_update": "stopped",
+  "bounce_checking": "running"
 }
